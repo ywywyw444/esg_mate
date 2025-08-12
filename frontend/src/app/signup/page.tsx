@@ -47,9 +47,9 @@ export default function SignupPage() {
     // JSON을 보기 좋게 포맷팅하여 alert에 표시
     alert(JSON.stringify(signupData, null, 2));
     
-    // auth-service로 직접 요청 (환경변수 사용)
-    const authServiceUrl = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || 'https://api.kangyouwon.com';
-    axios.post(`${authServiceUrl}/api/v1/auth-service/signup`, formData)
+    // Gateway를 통해 auth-service로 요청
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.kangyouwon.com';
+    axios.post(`${apiUrl}/v1/auth-service/signup`, formData)
       .then(response => {
         console.log('Signup successful:', response.data);
         
