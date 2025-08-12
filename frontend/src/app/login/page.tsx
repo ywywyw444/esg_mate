@@ -40,9 +40,9 @@ export default function LoginPage() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Gateway를 통해 auth-service로 요청
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://gateway-production-1104.up.railway.app';
-                axios.post(`${apiUrl}/api/v1/auth/login`, formData)
+    // 직접 auth-service로 요청 (게이트웨이 우회)
+    const apiUrl = 'https://auth-service-production-f2ef.up.railway.app';
+                axios.post(`${apiUrl}/login`, formData)
       .then(response => {
         console.log('Login response:', response.data);
         

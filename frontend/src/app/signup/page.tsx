@@ -48,18 +48,12 @@ export default function SignupPage() {
       // JSON을 보기 좋게 포맷팅하여 alert에 표시
       alert(JSON.stringify(signupData, null, 2));
       
-      // Gateway를 통해 auth-service로 요청
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://gateway-production-1104.up.railway.app';
+      // 직접 auth-service로 요청 (게이트웨이 우회)
+      const apiUrl = 'https://auth-service-production-f2ef.up.railway.app';
       console.log(`😂 apiUrl: ${apiUrl}`);
 
-      // ===== [가드 추가] 환경변수 누락 시 사용자 안내 =====
-      if (!apiUrl) {
-        alert('❌ 서버 주소(NEXT_PUBLIC_API_URL)가 설정되지 않았습니다. 환경변수를 확인해주세요.');
-        return;
-      }
-
       // 비동기 요청 처리
-      const response = await axios.post(`${apiUrl}/api/v1/auth/signup`, formData);
+      const response = await axios.post(`${apiUrl}/signup`, formData);
       console.log('Signup successful:', response.data);
       
       // 성공 메시지 표시
