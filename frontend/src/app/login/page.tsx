@@ -42,7 +42,7 @@ export default function LoginPage() {
     
     // auth-service로 직접 요청 (환경변수 사용)
     const authServiceUrl = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || 'https://api.kangyouwon.com';
-    axios.post(`${authServiceUrl}/login`, formData)
+    axios.post(`${authServiceUrl}/api/v1/auth-service/login`, formData)
       .then(response => {
         console.log('Login response:', response.data);
         

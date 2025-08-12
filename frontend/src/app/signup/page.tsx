@@ -49,7 +49,7 @@ export default function SignupPage() {
     
     // auth-service로 직접 요청 (환경변수 사용)
     const authServiceUrl = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || 'https://api.kangyouwon.com';
-    axios.post(`${authServiceUrl}/signup`, formData)
+    axios.post(`${authServiceUrl}/api/v1/auth-service/signup`, formData)
       .then(response => {
         console.log('Signup successful:', response.data);
         
