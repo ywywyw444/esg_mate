@@ -198,9 +198,10 @@ async def proxy_post(
             except Exception as e:
                 logger.warning(f"요청 본문 읽기 실패: {str(e)}")
                 
-        # 서비스에 요청 전달
+        # 서비스에 요청 전달 (서비스 이름을 명시적으로 전달)
         response = await service_discovery.request(
             method="POST",
+            service_name=str(service),  # 서비스 이름 명시
             path=path,
             headers=headers,
             body=body,

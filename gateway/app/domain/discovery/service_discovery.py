@@ -178,21 +178,25 @@ class ServiceDiscovery:
             for service_name in self.registry.keys()
         }
     
-    async def request(self, method: str, path: str, headers: Dict = None, 
+    async def request(self, method: str, service_name: str = None, path: str = None, headers: Dict = None, 
                      body: bytes = None, files: Dict = None, params: Dict = None, 
                      data: Dict = None) -> Any:
         """서비스에 요청을 전달하는 메서드"""
         try:
-            # 서비스 이름 추출 (path의 첫 번째 부분)
-            service_name = path.split('/')[0] if path else "chatbot-service"
+            # 서비스 이름이 명시적으로 전달된 경우 사용, 아니면 path에서 추출
+            if not service_name:
+                service_name = path.split('/')[0] if path else "chatbot-service"
             
             # 서비스 인스턴스 선택
             instance = self.get_service_instance(service_name)
             if not instance:
                 raise Exception(f"Service {service_name} not available")
             
-            # 요청 URL 구성
-            url = f"{instance.url}/{path}"
+            # 요청 URL 구성 (path가 None이면 서비스 루트로)
+            if path:
+                url = f"{instance.url}/{path}"
+            else:
+                url = instance.url
             
             # 요청 파라미터 구성
             request_kwargs = {
