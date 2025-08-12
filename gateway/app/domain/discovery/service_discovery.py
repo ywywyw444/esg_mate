@@ -1,10 +1,11 @@
 import httpx
 import asyncio
 import logging
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Union
 from datetime import datetime
 import random
 import time
+from .service_type import ServiceType
 
 logger = logging.getLogger(__name__)
 
@@ -116,8 +117,11 @@ class ServiceDiscovery:
         
         logger.info(f"Service {service_name} registered with {len(service_instances)} instances")
     
-    def get_service_instance(self, service_name: str) -> Optional[ServiceInstance]:
-        logger.info(f"🔍 get_service_instance 호출: service_name={service_name}")
+    def get_service_instance(self, service: Union[ServiceType, str]) -> Optional[ServiceInstance]:
+        # ServiceType enum이면 value를 사용, str이면 그대로 사용
+        service_name = service.value if isinstance(service, ServiceType) else service
+        
+        logger.info(f"🔍 get_service_instance 호출: service={service}, service_name={service_name}")
         logger.info(f"🔍 현재 등록된 서비스들: {list(self.registry.keys())}")
         
         if service_name not in self.registry:
@@ -125,9 +129,9 @@ class ServiceDiscovery:
             logger.warning(f"🔍 Available services: {list(self.registry.keys())}")
             return None
         
-        service = self.registry[service_name]
-        instances = service["instances"]
-        load_balancer_type = service["load_balancer_type"]
+        service_info = self.registry[service_name]
+        instances = service_info["instances"]
+        load_balancer_type = service_info["load_balancer_type"]
         
         logger.info(f"✅ Service {service_name} found with {len(instances)} instances")
         
@@ -190,17 +194,20 @@ class ServiceDiscovery:
             for service_name in self.registry.keys()
         }
     
-    async def request(self, method: str, service_name: str = None, path: str = None, headers: Dict = None, 
+    async def request(self, method: str, service: Union[ServiceType, str] = None, path: str = None, headers: Dict = None, 
                      body: bytes = None, files: Dict = None, params: Dict = None, 
                      data: Dict = None) -> Any:
         """서비스에 요청을 전달하는 메서드"""
         try:
-            # 서비스 이름이 명시적으로 전달된 경우 사용, 아니면 path에서 추출
-            if not service_name:
+            # 서비스가 명시적으로 전달된 경우 사용, 아니면 path에서 추출
+            if not service:
                 service_name = path.split('/')[0] if path else "chatbot-service"
+            else:
+                # ServiceType enum이면 value를 사용, str이면 그대로 사용
+                service_name = service.value if isinstance(service, ServiceType) else service
             
             # 서비스 인스턴스 선택
-            instance = self.get_service_instance(service_name)
+            instance = self.get_service_instance(service)
             if not instance:
                 raise Exception(f"Service {service_name} not available")
             

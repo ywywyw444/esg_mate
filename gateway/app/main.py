@@ -140,12 +140,6 @@ logger.info("🔧 라우터 등록 중...")
 app.include_router(gateway_router)
 logger.info("✅ Gateway 라우터 등록 완료")
 
-# 등록된 라우트 확인
-logger.info("🔍 등록된 라우트들:")
-for route in app.routes:
-    if hasattr(route, 'path'):
-        logger.info(f"  - {route.methods} {route.path}")
-
 # 🪡🪡🪡 파일이 필요한 서비스 목록 (현재는 없음)
 FILE_REQUIRED_SERVICES = set()
 
@@ -166,6 +160,7 @@ async def proxy_get(
         
         response = await service_discovery.request(
             method="GET",
+            service=service,  # ServiceType enum 직접 전달
             path=path,
             headers=headers
         )
@@ -187,6 +182,11 @@ async def proxy_post(
     sheet_names: Optional[List[str]] = Query(None, alias="sheet_name")
 ):
     logger.info("🚀 POST 프록시 함수 시작!")
+    logger.info(f"🚀 요청 URL: {request.url}")
+    logger.info(f"🚀 요청 메서드: {request.method}")
+    logger.info(f"🚀 요청 경로: {request.url.path}")
+    logger.info(f"🚀 서비스 파라미터: {service}")
+    logger.info(f"🚀 경로 파라미터: {path}")
     try:
         # 디버깅 로그 추가
         logger.info(f"🔍 Gateway POST 요청: service={service}, path={path}")
@@ -195,8 +195,8 @@ async def proxy_post(
         # app.state에서 service_discovery 가져오기
         service_discovery = request.app.state.service_discovery
         
-        # 서비스 인스턴스 확인
-        instance = service_discovery.get_service_instance(str(service))
+        # 서비스 인스턴스 확인 (ServiceType enum 직접 전달)
+        instance = service_discovery.get_service_instance(service)
         if instance:
             logger.info(f"✅ 서비스 인스턴스 찾음: {instance.host}:{instance.port}")
             logger.info(f"🎯 최종 요청 URL: {instance.url}/{path}")
@@ -255,10 +255,10 @@ async def proxy_post(
             except Exception as e:
                 logger.warning(f"요청 본문 읽기 실패: {str(e)}")
                 
-        # 서비스에 요청 전달 (서비스 이름을 명시적으로 전달)
+        # 서비스에 요청 전달 (ServiceType enum 직접 전달)
         response = await service_discovery.request(
             method="POST",
-            service_name=str(service),  # 서비스 이름 명시
+            service=service,  # ServiceType enum 직접 전달
             path=path,
             headers=headers,
             body=body,
@@ -296,6 +296,7 @@ async def proxy_put(service: ServiceType, path: str, request: Request):
         
         response = await service_discovery.request(
             method="PUT",
+            service=service,  # ServiceType enum 직접 전달
             path=path,
             headers=headers,
             body=await request.body()
@@ -320,6 +321,7 @@ async def proxy_delete(service: ServiceType, path: str, request: Request):
         
         response = await service_discovery.request(
             method="DELETE",
+            service=service,  # ServiceType enum 직접 전달
             path=path,
             headers=headers,
             body=await request.body()
@@ -344,6 +346,7 @@ async def proxy_patch(service: ServiceType, path: str, request: Request):
         
         response = await service_discovery.request(
             method="PATCH",
+            service=service,  # ServiceType enum 직접 전달
             path=path,
             headers=headers,
             body=await request.body()
@@ -356,11 +359,27 @@ async def proxy_patch(service: ServiceType, path: str, request: Request):
             status_code=500
         )
 
+# 라우트 등록 확인 (모든 라우트 함수 정의 후)
+logger.info("🔍 등록된 라우트들:")
+for route in app.routes:
+    if hasattr(route, 'path'):
+        logger.info(f"  - {route.methods} {route.path}")
+        # POST 라우트 특별 확인
+        if 'POST' in route.methods and '{service}' in route.path:
+            logger.info(f"🎯 POST 동적 라우트 발견: {route.path}")
+            logger.info(f"🎯 라우트 함수: {route.endpoint.__name__ if hasattr(route, 'endpoint') else 'Unknown'}")
 
 # 404 에러 핸들러
 @app.exception_handler(404)
 async def not_found_handler(request: Request, exc):
-    logger.error(f"404 에러: {request.url}")
+    logger.error(f"🚨 404 에러 발생!")
+    logger.error(f"🚨 요청 URL: {request.url}")
+    logger.error(f"🚨 요청 메서드: {request.method}")
+    logger.error(f"🚨 요청 경로: {request.url.path}")
+    logger.error(f"🚨 등록된 라우트들:")
+    for route in app.routes:
+        if hasattr(route, 'path'):
+            logger.error(f"  - {route.methods} {route.path}")
     return JSONResponse(
         status_code=404,
         content={"detail": f"요청한 리소스를 찾을 수 없습니다. URL: {request.url}"}
