@@ -2,7 +2,7 @@
 builder = "nixpacks"
 
 [deploy]
-startCommand = "cd gateway && python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+startCommand = "cd gateway && python3.11 -m uvicorn app.main:app --host 0.0.0.0 --port $PORT"
 healthcheckPath = "/health"
 healthcheckTimeout = 300
 restartPolicyType = "on_failure"
@@ -10,9 +10,10 @@ restartPolicyType = "on_failure"
 [deploy.envs]
 NODE_ENV = "production"
 PYTHON_VERSION = "3.11"
+PYTHONPATH = "/app/gateway"
 
 # 서비스별 설정
 [deploy.services]
 frontend = { path = "frontend", buildCommand = "npm install && npm run build", startCommand = "npm start" }
-gateway = { path = "gateway", buildCommand = "pip install -r requirements.txt", startCommand = "python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT" }
-auth_service = { path = "service/auth-service", buildCommand = "pip install -r requirements.txt", startCommand = "python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT" }
+gateway = { path = "gateway", buildCommand = "python3.11 -m pip install -r requirements.txt", startCommand = "python3.11 -m uvicorn app.main:app --host 0.0.0.0 --port $PORT" }
+auth_service = { path = "service/auth-service", buildCommand = "python3.11 -m pip install -r requirements.txt", startCommand = "python3.11 -m uvicorn app.main:app --host 0.0.0.0 --port $PORT" }

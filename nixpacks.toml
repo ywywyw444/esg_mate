@@ -1,9 +1,11 @@
 [phases.setup]
-nixPkgs = ["python311", "nodejs_20", "postgresql"]
+nixPkgs = ["python311", "python311Packages.pip", "python311Packages.setuptools", "nodejs_20"]
 
 [phases.install]
 cmds = [
-  "cd gateway && pip install -r requirements.txt",
+  "python3.11 -m ensurepip --upgrade",
+  "python3.11 -m pip install --upgrade pip setuptools wheel",
+  "cd gateway && python3.11 -m pip install -r requirements.txt",
   "cd frontend && npm install"
 ]
 
@@ -13,7 +15,7 @@ cmds = [
 ]
 
 [start]
-cmd = "cd gateway && python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+cmd = "cd gateway && python3.11 -m uvicorn app.main:app --host 0.0.0.0 --port $PORT"
 
 [variables]
 PYTHON_VERSION = "3.11"
