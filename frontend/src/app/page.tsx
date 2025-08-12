@@ -14,7 +14,7 @@ export default function Home() {
         </svg>
       ),
       title: "who am i?",
-      description: "나는 태영이야"
+      description: "나는 유원이야"
     },
     {
       icon: (
