@@ -126,6 +126,18 @@ app.add_middleware(
 
 app.add_middleware(AuthMiddleware)
 
+# 모든 요청 로깅 미들웨어 추가
+@app.middleware("http")
+async def log_all_requests(request: Request, call_next):
+    logger.info(f"🌐 모든 요청 로깅: {request.method} {request.url.path}")
+    logger.info(f"🌐 요청 헤더: {dict(request.headers)}")
+    
+    # 응답 처리
+    response = await call_next(request)
+    
+    logger.info(f"🌐 응답 상태: {response.status_code}")
+    return response
+
 # 라우터 생성 및 등록
 logger.info("🔧 Gateway 라우터 생성 시작...")
 gateway_router = APIRouter(prefix="/api/v1", tags=["Gateway API"])
@@ -361,13 +373,24 @@ async def proxy_patch(service: ServiceType, path: str, request: Request):
 
 # 라우트 등록 확인 (모든 라우트 함수 정의 후)
 logger.info("🔍 등록된 라우트들:")
+post_routes_found = 0
 for route in app.routes:
     if hasattr(route, 'path'):
         logger.info(f"  - {route.methods} {route.path}")
         # POST 라우트 특별 확인
         if 'POST' in route.methods and '{service}' in route.path:
+            post_routes_found += 1
             logger.info(f"🎯 POST 동적 라우트 발견: {route.path}")
             logger.info(f"🎯 라우트 함수: {route.endpoint.__name__ if hasattr(route, 'endpoint') else 'Unknown'}")
+            logger.info(f"🎯 라우트 엔드포인트: {route.endpoint}")
+
+logger.info(f"🎯 총 POST 동적 라우트 개수: {post_routes_found}")
+
+# 라우터 상태 확인
+logger.info(f"🔍 gateway_router.routes 개수: {len(gateway_router.routes)}")
+for route in gateway_router.routes:
+    if hasattr(route, 'path'):
+        logger.info(f"  - {route.methods} {route.path}")
 
 # 404 에러 핸들러
 @app.exception_handler(404)
@@ -376,10 +399,19 @@ async def not_found_handler(request: Request, exc):
     logger.error(f"🚨 요청 URL: {request.url}")
     logger.error(f"🚨 요청 메서드: {request.method}")
     logger.error(f"🚨 요청 경로: {request.url.path}")
+    logger.error(f"🚨 요청 쿼리: {request.query_params}")
+    logger.error(f"🚨 요청 헤더: {dict(request.headers)}")
     logger.error(f"🚨 등록된 라우트들:")
     for route in app.routes:
         if hasattr(route, 'path'):
             logger.error(f"  - {route.methods} {route.path}")
+    
+    # 라우터별 라우트 확인
+    logger.error(f"🚨 gateway_router 라우트들:")
+    for route in gateway_router.routes:
+        if hasattr(route, 'path'):
+            logger.error(f"  - {route.methods} {route.path}")
+    
     return JSONResponse(
         status_code=404,
         content={"detail": f"요청한 리소스를 찾을 수 없습니다. URL: {request.url}"}
