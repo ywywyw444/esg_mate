@@ -1,0 +1,144 @@
+name: esg_mate
+
+services:
+  # Frontend (Next.js)
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   container_name: frontend
+  #   ports:
+  #     - "3001:3000"
+  #   volumes:
+  #     - ./frontend:/app
+  #   environment:
+  #     - NODE_ENV=development
+  #     - NEXT_PUBLIC_API_URL=http://gateway:8080
+  #   restart: always
+  #   depends_on:
+  #     - gateway
+  #   networks:
+  #     - app-network
+
+  # Gateway (FastAPI)
+  gateway:
+    build: ./gateway
+    container_name: gateway
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./gateway:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PORT=8080
+      - LOG_LEVEL=INFO
+      - GATEWAY_HOST=0.0.0.0
+      - GATEWAY_PORT=8080
+      - GATEWAY_RELOAD=false
+      - SERVICE_DISCOVERY_TYPE=static
+      - LOAD_BALANCER_TYPE=round_robin
+      - REQUEST_TIMEOUT=30
+      - HEALTH_CHECK_INTERVAL=30
+      - CORS_ORIGINS=["*"]
+      - CORS_ALLOW_CREDENTIALS=true
+      - CORS_ALLOW_METHODS=["*"]
+      - CORS_ALLOW_HEADERS=["*"]
+      - INIT_DATABASE=true
+      # Railway PostgreSQL 연결 (Public Network URL)
+      - DATABASE_URL=postgresql://postgres:YgIQJWEaQShbuQhRsAdVaeBUZatEgrQO@gondola.proxy.rlwy.net:46735/railway
+    restart: always
+    depends_on:
+      chatbot-service:
+        condition: service_started
+      auth-service:
+        condition: service_started
+      redis:
+        condition: service_started
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Chatbot Service (FastAPI)
+  chatbot-service:
+    build:
+      context: ./service/chatbot-service
+      dockerfile: Dockerfile
+    container_name: chatbot-service
+    ports:
+      - "8006:8006"
+    volumes:
+      - ./service/chatbot-service:/app
+    environment:
+      - SERVICE_HOST=0.0.0.0
+      - SERVICE_PORT=8006
+      - LOG_LEVEL=INFO
+      - PYTHONUNBUFFERED=1
+    restart: always
+    depends_on:
+      - redis
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8006/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Auth Service (FastAPI)
+  auth-service:
+    build:
+      context: ./service/auth-service
+      dockerfile: Dockerfile
+    container_name: auth-service
+    ports:
+      - "8008:8008"
+    volumes:
+      - ./service/auth-service:/app
+    environment:
+      - SERVICE_HOST=0.0.0.0
+      - SERVICE_PORT=8008
+      - LOG_LEVEL=INFO
+      - PYTHONUNBUFFERED=1
+      - INIT_DATABASE=true
+      # Railway PostgreSQL 연결 (Public Network URL)
+      - DATABASE_URL=postgresql://postgres:YgIQJWEaQShbuQhRsAdVaeBUZatEgrQO@gondola.proxy.rlwy.net:46735/railway
+    restart: always
+    depends_on:
+      - redis
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8008/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # PostgreSQL (데이터베이스) - 제거됨 (Railway PostgreSQL 사용)
+
+  # Redis (캐싱 및 세션 저장)
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+    restart: always
+    command: redis-server
+
+networks:
+  app-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16 
