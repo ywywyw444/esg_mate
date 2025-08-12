@@ -23,7 +23,11 @@ class ServiceInstance:
     
     @property
     def url(self) -> str:
-        return f"http://{self.host}:{self.port}"
+        # Railway 환경에서는 HTTPS 사용
+        if self.port == 443:
+            return f"https://{self.host}"
+        else:
+            return f"http://{self.host}:{self.port}"
     
     def to_dict(self) -> Dict:
         return {

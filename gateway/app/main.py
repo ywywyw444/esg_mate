@@ -37,19 +37,33 @@ async def lifespan(app: FastAPI):
     # 서비스 디스커버리 초기화 및 서비스 등록
     app.state.service_discovery = ServiceDiscovery()
     
-    # 기본 서비스 등록
-    app.state.service_discovery.register_service(
-        service_name="chatbot-service",
-        instances=[{"host": "chatbot-service", "port": 8006, "weight": 1}],
-        load_balancer_type="round_robin"
-    )
-    
-    # Auth Service 등록
-    app.state.service_discovery.register_service(
-        service_name="auth-service",
-        instances=[{"host": "auth-service", "port": 8008, "weight": 1}],
-        load_balancer_type="round_robin"
-    )
+    # Railway 환경에서는 실제 서비스 URL 사용
+    if os.getenv("RAILWAY_ENVIRONMENT") == "true":
+        # Railway 프로덕션 환경
+        app.state.service_discovery.register_service(
+            service_name="chatbot-service",
+            instances=[{"host": "chatbot-service-production-1deb.up.railway.app", "port": 443, "weight": 1}],
+            load_balancer_type="round_robin"
+        )
+        
+        app.state.service_discovery.register_service(
+            service_name="auth-service",
+            instances=[{"host": "auth-service-production-1deb.up.railway.app", "port": 443, "weight": 1}],
+            load_balancer_type="round_robin"
+        )
+    else:
+        # 로컬 개발 환경
+        app.state.service_discovery.register_service(
+            service_name="chatbot-service",
+            instances=[{"host": "chatbot-service", "port": 8006, "weight": 1}],
+            load_balancer_type="round_robin"
+        )
+        
+        app.state.service_discovery.register_service(
+            service_name="auth-service",
+            instances=[{"host": "auth-service", "port": 8008, "weight": 1}],
+            load_balancer_type="round_robin"
+        )
     
     yield
     logger.info("🛑 Gateway API 서비스 종료")
