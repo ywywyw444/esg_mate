@@ -88,8 +88,8 @@ app.add_middleware(
         "http://127.0.0.1:3000",  # 로컬 IP 접근
         "http://127.0.0.1:3001",  # 로컬 IP 접근 (포트 3001)
         "http://frontend:3000",   # Docker 내부 네트워크
-        "https://www.taezero.com",  # 프로덕션 도메인
-        "https://taezero.com",      # 프로덕션 도메인 (www 없이)
+        "https://www.kangyouwon.com",  # 프로덕션 도메인
+        "https://kangyouwon.com",      # 프로덕션 도메인 (www 없이)
         "https://auth-service-production-1deb.up.railway.app",  # Railway auth-service
         "*"  # 개발 환경에서 모든 origin 허용
     ],
