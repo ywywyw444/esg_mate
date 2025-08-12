@@ -93,8 +93,8 @@ async def lifespan(app: FastAPI):
         )
         logger.info("✅ auth-service 등록 완료")
         
-        # 등록된 서비스 확인
-        logger.info(f"🔍 등록된 서비스들: {list(app.state.service_discovery.registry.keys())}")
+            # 등록된 서비스 확인
+    logger.info(f"🔍 등록된 서비스들: {list(app.state.service_discovery.registry.keys())}")
     
     yield
     logger.info("🛑 Gateway API 서비스 종료")
@@ -126,6 +126,8 @@ app.add_middleware(
 
 app.add_middleware(AuthMiddleware)
 
+# 라우터 생성 및 등록
+logger.info("🔧 Gateway 라우터 생성 시작...")
 gateway_router = APIRouter(prefix="/api/v1", tags=["Gateway API"])
 
 # 라우터 등록 확인 로그
@@ -134,6 +136,7 @@ logger.info(f"🔧 라우터 prefix: {gateway_router.prefix}")
 logger.info(f"🔧 라우터 tags: {gateway_router.tags}")
 
 # 라우터 등록
+logger.info("🔧 라우터 등록 중...")
 app.include_router(gateway_router)
 logger.info("✅ Gateway 라우터 등록 완료")
 
