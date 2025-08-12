@@ -213,7 +213,11 @@ class ServiceDiscovery:
             
             # 요청 URL 구성 (path가 None이면 서비스 루트로)
             if path:
-                url = f"{instance.url}/{path}"
+                # auth 서비스의 경우 /login, /signup 등 루트 경로 사용
+                if service_name == "auth":
+                    url = f"{instance.url}/{path}"
+                else:
+                    url = f"{instance.url}/{path}"
             else:
                 url = instance.url
             
