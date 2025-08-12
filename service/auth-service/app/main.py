@@ -8,8 +8,9 @@ from dotenv import load_dotenv
 from contextlib import asynccontextmanager
 from typing import List
 
-from fastapi import FastAPI, Request, Depends, Response
+from fastapi import FastAPI, Request, Depends, Response, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 
 # SQLAlchemy AsyncSession 강제 import
 try:
@@ -79,34 +80,12 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# ---------- CORS 설정 (핵심 수정) ----------
-# '*' 제거: credentials(true)와 함께 쓰면 브라우저가 거부합니다.
-def parse_origins() -> List[str]:
-    # 환경변수로도 확장 가능: CORS_ORIGINS="https://a.com,https://b.com"
-    extra = os.getenv("CORS_ORIGINS", "")
-    extra_list = [o.strip() for o in extra.split(",") if o.strip()]
-    base = [
-        "http://localhost:3000",
-        "http://localhost:3001",
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:3001",
-        "http://frontend:3000",
-        "https://www.kangyouwon.com",
-        "https://kangyouwon.com",
-        "https://esg-mate-iq7qhquuv-ywyw74s-projects.vercel.app",
-        "https://esg-mate.vercel.app",
-    ]
-    # Railway 자체 도메인은 Origin이 되지 않으므로 굳이 필요 없음
-    return list(dict.fromkeys(base + extra_list))
-
-ALLOWED_ORIGINS = parse_origins()
-
+# ---------- CORS 설정 (임시 해결책) ----------
+# 모든 도메인 허용 (임시)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
-    # 프리뷰 브랜치 vercel.app 전체 허용(원하면 제거 가능)
-    allow_origin_regex=r"^https:\/\/[a-z0-9-]+\.vercel\.app$",
-    allow_credentials=True,
+    allow_origins=["*"],  # 임시로 모든 도메인 허용
+    allow_credentials=False,  # credentials와 *를 함께 사용할 수 없음
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
 )
@@ -115,6 +94,40 @@ app.add_middleware(
 @app.options("/{rest_of_path:path}")
 async def preflight_handler(rest_of_path: str):
     return Response(status_code=204)
+# -----------------------------------------
+
+
+# ---------- 보안 미들웨어 추가 ----------
+@app.middleware("http")
+async def security_middleware(request: Request, call_next):
+    # 악성 경로 차단
+    malicious_paths = [
+        "/.git/", "/.svn/", "/@fs/", "/etc/", "/proc/", "/sys/",
+        "/wp-admin/", "/phpmyadmin/", "/admin/", "/backup/",
+        "/config/", "/.env", "/.htaccess", "/robots.txt"
+    ]
+    
+    path = request.url.path.lower()
+    for malicious_path in malicious_paths:
+        if malicious_path in path:
+            logger.warning(f"🚫 악성 요청 차단: {request.url.path} from {request.client.host}")
+            raise HTTPException(status_code=403, detail="Access Forbidden")
+    
+    # User-Agent 차단 (스캐너, 봇 등)
+    user_agent = request.headers.get("user-agent", "").lower()
+    blocked_agents = ["scanner", "bot", "crawler", "spider", "nmap", "sqlmap"]
+    if any(agent in user_agent for agent in blocked_agents):
+        logger.warning(f"🚫 차단된 User-Agent: {user_agent} from {request.client.host}")
+        raise HTTPException(status_code=403, detail="Access Forbidden")
+    
+    response = await call_next(request)
+    return response
+
+# TrustedHost 미들웨어 추가
+app.add_middleware(
+    TrustedHostMiddleware,
+    allowed_hosts=["*"]  # 프로덕션에서는 특정 호스트만 허용
+)
 # -----------------------------------------
 
 
