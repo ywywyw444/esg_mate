@@ -392,6 +392,20 @@ for route in gateway_router.routes:
     if hasattr(route, 'path'):
         logger.info(f"  - {route.methods} {route.path}")
 
+# 서비스 등록 상태 확인
+logger.info("🔍 서비스 등록 상태 확인:")
+logger.info(f"🔍 ServiceType.AUTH = {ServiceType.AUTH}")
+logger.info(f"🔍 ServiceType.AUTH.value = {ServiceType.AUTH.value}")
+logger.info(f"🔍 ServiceType.AUTH == 'auth': {ServiceType.AUTH == 'auth'}")
+logger.info(f"🔍 'auth' in ServiceType: {'auth' in [s.value for s in ServiceType]}")
+
+# 라우트 매칭 테스트
+logger.info("🔍 라우트 매칭 테스트:")
+test_path = "/api/v1/auth/signup"
+logger.info(f"🔍 테스트 경로: {test_path}")
+logger.info(f"🔍 경로에서 service 추출: {test_path.split('/')[3] if len(test_path.split('/')) > 3 else 'N/A'}")
+logger.info(f"🔍 경로에서 path 추출: {test_path.split('/')[4:] if len(test_path.split('/')) > 4 else 'N/A'}")
+
 # 404 에러 핸들러
 @app.exception_handler(404)
 async def not_found_handler(request: Request, exc):
@@ -401,6 +415,16 @@ async def not_found_handler(request: Request, exc):
     logger.error(f"🚨 요청 경로: {request.url.path}")
     logger.error(f"🚨 요청 쿼리: {request.query_params}")
     logger.error(f"🚨 요청 헤더: {dict(request.headers)}")
+    
+    # 경로 파싱 분석
+    path_parts = request.url.path.split('/')
+    logger.error(f"🚨 경로 파싱: {path_parts}")
+    if len(path_parts) >= 5:
+        logger.error(f"🚨 추출된 service: {path_parts[3]}")
+        logger.error(f"🚨 추출된 path: {path_parts[4:]}")
+        logger.error(f"🚨 ServiceType.AUTH.value: {ServiceType.AUTH.value}")
+        logger.error(f"🚨 service 매칭 여부: {path_parts[3] == ServiceType.AUTH.value}")
+    
     logger.error(f"🚨 등록된 라우트들:")
     for route in app.routes:
         if hasattr(route, 'path'):
