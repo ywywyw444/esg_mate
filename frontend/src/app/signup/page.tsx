@@ -72,15 +72,26 @@ export default function SignupPage() {
         alert(`❌ ${msg}`);
       }
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Signup failed:', error);
       
       // 에러 응답 처리
-      const serverMsg =
-        error?.response?.data?.message ||
-        error?.response?.data?.detail ||
-        error?.message ||
-        '알 수 없는 오류';
+      let serverMsg = '알 수 없는 오류';
+      
+      if (error && typeof error === 'object') {
+        if ('response' in error && error.response && typeof error.response === 'object') {
+          if ('data' in error.response && error.response.data && typeof error.response.data === 'object') {
+            if ('message' in error.response.data && typeof error.response.data.message === 'string') {
+              serverMsg = error.response.data.message;
+            } else if ('detail' in error.response.data && typeof error.response.data.detail === 'string') {
+              serverMsg = error.response.data.detail;
+            }
+          }
+        } else if ('message' in error && typeof error.message === 'string') {
+          serverMsg = error.message;
+        }
+      }
+      
       alert(`❌ 회원가입 실패: ${serverMsg}`);
     }
   };
