@@ -70,6 +70,8 @@ app.add_middleware(
         "http://frontend:3000",   # Docker 내부 네트워크
         "https://www.kangyouwon.com",  # 프로덕션 도메인
         "https://kangyouwon.com",      # 프로덕션 도메인 (www 없이)
+        "https://esg-mate-iq7qhquuv-ywyw74s-projects.vercel.app",  # Vercel 프론트엔드
+        "https://esg-mate.vercel.app",  # Vercel 메인 도메인
         "*"  # 개발 환경에서 모든 origin 허용
     ], # 프론트엔드 주소 명시
     allow_credentials=True,  # HttpOnly 쿠키 사용을 위해 필수

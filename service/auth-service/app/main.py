@@ -91,6 +91,8 @@ app.add_middleware(
         "https://www.kangyouwon.com",  # 프로덕션 도메인
         "https://kangyouwon.com",      # 프로덕션 도메인 (www 없이)
         "https://auth-service-production-1deb.up.railway.app",  # Railway auth-service
+        "https://esg-mate-iq7qhquuv-ywyw74s-projects.vercel.app",  # Vercel 프론트엔드
+        "https://esg-mate.vercel.app",  # Vercel 메인 도메인
         "*"  # 개발 환경에서 모든 origin 허용
     ],
     allow_credentials=True,
