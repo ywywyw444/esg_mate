@@ -156,6 +156,13 @@ logger.info("🔧 라우터 등록 중...")
 app.include_router(gateway_router)
 logger.info("✅ Gateway 라우터 등록 완료")
 
+# 라우터 등록 후 즉시 라우트 확인
+logger.info("🔍 라우터 등록 직후 라우트 확인:")
+for route in gateway_router.routes:
+    if hasattr(route, 'path'):
+        logger.info(f"  - {route.methods} {route.path}")
+        logger.info(f"    함수: {route.endpoint.__name__ if hasattr(route, 'endpoint') else 'Unknown'}")
+
 # 🪡🪡🪡 파일이 필요한 서비스 목록 (현재는 없음)
 FILE_REQUIRED_SERVICES = set()
 
@@ -199,6 +206,7 @@ async def proxy_post(
     file: Optional[UploadFile] = None,
     sheet_names: Optional[List[str]] = Query(None, alias="sheet_name")
 ):
+    logger.info(f"🚀 POST 프록시 함수 시작! service={service}, path={path}")
     logger.info("🚀 POST 프록시 함수 시작!")
     logger.info(f"🚀 요청 URL: {request.url}")
     logger.info(f"🚀 요청 메서드: {request.method}")
