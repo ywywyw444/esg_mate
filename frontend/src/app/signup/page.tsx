@@ -28,60 +28,61 @@ export default function SignupPage() {
   };
 
   // Signup form submission
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // 입력된 데이터를 JSON 형태로 alert에 표시
-    const signupData = {
-      "회원가입 정보": {
-        "회사 ID": formData.company_id,
-        "산업": formData.industry,
-        "이메일": formData.email,
-        "이름": formData.name,
-        "나이": formData.age,
-        "인증 ID": formData.auth_id,
-        "인증 비밀번호": formData.auth_pw
-      }
-    };
-    
-    // JSON을 보기 좋게 포맷팅하여 alert에 표시
-    alert(JSON.stringify(signupData, null, 2));
-    
-    // Gateway를 통해 auth-service로 요청
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    console.log(`😂 apiUrl: ${apiUrl}`);
-
-    // ===== [가드 추가] 환경변수 누락 시 사용자 안내 =====
-    if (!apiUrl) {
-      alert('❌ 서버 주소(NEXT_PUBLIC_API_URL)가 설정되지 않았습니다. 환경변수를 확인해주세요.');
-      return;
-    }
-
-    axios.post(`${apiUrl}/api/v1/auth/signup`, formData)
-      .then(response => {
-        console.log('Signup successful:', response.data);
-        
-        // 성공 메시지 표시
-        if (response.data?.success) {
-          alert(`✅ ${response.data.message}\n\n이메일: ${response.data.email}\n사용자 ID: ${response.data.user_id}`);
-          router.push('/login');
-        } else {
-          // success 플래그가 없거나 false인 경우
-          const msg = response.data?.message || '알 수 없는 응답 형식입니다.';
-          alert(`❌ ${msg}`);
+    try {
+      // 입력된 데이터를 JSON 형태로 alert에 표시
+      const signupData = {
+        "회원가입 정보": {
+          "회사 ID": formData.company_id,
+          "산업": formData.industry,
+          "이메일": formData.email,
+          "이름": formData.name,
+          "나이": formData.age,
+          "인증 ID": formData.auth_id,
+          "인증 비밀번호": formData.auth_pw
         }
-      })
-      .catch(error => {
-        console.error('Signup failed:', error);
-        
-        // 에러 응답 처리
-        const serverMsg =
-          error?.response?.data?.message ||
-          error?.response?.data?.detail ||
-          error?.message ||
-          '알 수 없는 오류';
-        alert(`❌ 회원가입 실패: ${serverMsg}`);
-      });
+      };
+      
+      // JSON을 보기 좋게 포맷팅하여 alert에 표시
+      alert(JSON.stringify(signupData, null, 2));
+      
+      // Gateway를 통해 auth-service로 요청
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://gateway-production-1104.up.railway.app';
+      console.log(`😂 apiUrl: ${apiUrl}`);
+
+      // ===== [가드 추가] 환경변수 누락 시 사용자 안내 =====
+      if (!apiUrl) {
+        alert('❌ 서버 주소(NEXT_PUBLIC_API_URL)가 설정되지 않았습니다. 환경변수를 확인해주세요.');
+        return;
+      }
+
+      // 비동기 요청 처리
+      const response = await axios.post(`${apiUrl}/api/v1/auth/signup`, formData);
+      console.log('Signup successful:', response.data);
+      
+      // 성공 메시지 표시
+      if (response.data?.success) {
+        alert(`✅ ${response.data.message}\n\n이메일: ${response.data.email}\n사용자 ID: ${response.data.user_id}`);
+        router.push('/login');
+      } else {
+        // success 플래그가 없거나 false인 경우
+        const msg = response.data?.message || '알 수 없는 응답 형식입니다.';
+        alert(`❌ ${msg}`);
+      }
+      
+    } catch (error: any) {
+      console.error('Signup failed:', error);
+      
+      // 에러 응답 처리
+      const serverMsg =
+        error?.response?.data?.message ||
+        error?.response?.data?.detail ||
+        error?.message ||
+        '알 수 없는 오류';
+      alert(`❌ 회원가입 실패: ${serverMsg}`);
+    }
   };
 
   // Go back to login page
