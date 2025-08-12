@@ -49,29 +49,38 @@ export default function SignupPage() {
     
     // Gateway를 통해 auth-service로 요청
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    console.log(`😂😂😂😂😂apiUrl: ${apiUrl}`);
-                axios.post(`${apiUrl}/api/v1/auth/signup`, formData)
+    console.log(`😂 apiUrl: ${apiUrl}`);
+
+    // ===== [가드 추가] 환경변수 누락 시 사용자 안내 =====
+    if (!apiUrl) {
+      alert('❌ 서버 주소(NEXT_PUBLIC_API_URL)가 설정되지 않았습니다. 환경변수를 확인해주세요.');
+      return;
+    }
+
+    axios.post(`${apiUrl}/api/v1/auth/signup`, formData)
       .then(response => {
         console.log('Signup successful:', response.data);
         
         // 성공 메시지 표시
-        if (response.data.success) {
+        if (response.data?.success) {
           alert(`✅ ${response.data.message}\n\n이메일: ${response.data.email}\n사용자 ID: ${response.data.user_id}`);
-          // 로그인 페이지로 자동 이동
           router.push('/login');
         } else {
-          alert(`❌ ${response.data.message}`);
+          // success 플래그가 없거나 false인 경우
+          const msg = response.data?.message || '알 수 없는 응답 형식입니다.';
+          alert(`❌ ${msg}`);
         }
       })
       .catch(error => {
         console.error('Signup failed:', error);
         
         // 에러 응답 처리
-        if (error.response && error.response.data) {
-          alert(`❌ 회원가입 실패: ${error.response.data.message || error.response.data.detail || '알 수 없는 오류'}`);
-        } else {
-          alert('❌ 회원가입에 실패했습니다. 서버 연결을 확인해주세요.');
-        }
+        const serverMsg =
+          error?.response?.data?.message ||
+          error?.response?.data?.detail ||
+          error?.message ||
+          '알 수 없는 오류';
+        alert(`❌ 회원가입 실패: ${serverMsg}`);
       });
   };
 
