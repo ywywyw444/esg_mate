@@ -1,0 +1,20 @@
+[phases.setup]
+nixPkgs = ["python311", "nodejs_20", "postgresql"]
+
+[phases.install]
+cmds = [
+  "cd gateway && pip install -r requirements.txt",
+  "cd frontend && npm install"
+]
+
+[phases.build]
+cmds = [
+  "cd frontend && npm run build"
+]
+
+[start]
+cmd = "cd gateway && python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+
+[variables]
+PYTHON_VERSION = "3.11"
+NODE_VERSION = "20"
