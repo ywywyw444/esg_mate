@@ -13,8 +13,11 @@ class AuthMiddleware:
         if scope["type"] == "http":
             request = Request(scope, receive)
             
-            # 인증 제외할 엔드포인트들
-            if request.url.path in ["/health", "/login", "/api/v1/signup", "/", "/docs", "/openapi.json", "/redoc"]:
+            # 인증 제외할 엔드포인트들 (패턴 매칭)
+            excluded_paths = ["/health", "/login", "/", "/docs", "/openapi.json", "/redoc"]
+            if (request.url.path in excluded_paths or 
+                request.url.path.startswith("/api/v1/auth/") or
+                request.url.path.startswith("/docs")):
                 return await self.app(scope, receive, send)
             
             # JWT 토큰 검증 (간단한 구현)
@@ -49,4 +52,4 @@ class AuthMiddleware:
             return "user123" if token else None
         except Exception as e:
             logger.error(f"Token extraction error: {str(e)}")
-            return None 
+            return None
