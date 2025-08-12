@@ -334,5 +334,5 @@ async def health_check_db():
 if __name__ == "__main__":
     import uvicorn
     # Railway의 PORT 환경변수 사용, 없으면 8080 기본값
-    port = int(os.getenv("PORT", os.getenv("SERVICE_PORT", 8080)))
+    port = int(os.getenv("PORT", 8080))
     uvicorn.run("app.main:app", host="0.0.0.0", port=port, reload=True)
