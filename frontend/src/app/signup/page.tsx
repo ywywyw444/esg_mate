@@ -48,7 +48,8 @@ export default function SignupPage() {
     alert(JSON.stringify(signupData, null, 2));
     
     // Gateway를 통해 auth-service로 요청
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://gateway-production-1104.up.railway.app';
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    console.log(`😂😂😂😂😂apiUrl: ${apiUrl}`);
     axios.post(`${apiUrl}/api/v1/auth-service/signup`, formData)
       .then(response => {
         console.log('Signup successful:', response.data);
