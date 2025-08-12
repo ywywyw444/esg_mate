@@ -28,7 +28,7 @@ logger = logging.getLogger("gateway_api")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("🚀 Gateway API 서비스 시작")
+    logger.info("�� Gateway API 서비스 시작")
 
     # Settings 초기화 및 앱 state에 등록
     app.state.settings = Settings()
@@ -43,7 +43,7 @@ async def lifespan(app: FastAPI):
     port = os.getenv("PORT", "8080")
     
     logger.info(f"🔍 환경변수 확인: RAILWAY_ENVIRONMENT={railway_env}")
-    logger.info(f"🔍 환경변수 확인: RAILWAY_SERVICE_NAME={railway_service_name}")
+    logger.info(f"�� 환경변수 확인: RAILWAY_SERVICE_NAME={railway_service_name}")
     logger.info(f"🔍 환경변수 확인: RAILWAY_PROJECT_ID={railway_project_id}")
     logger.info(f"🔍 환경변수 확인: PORT={port}")
     
@@ -97,7 +97,7 @@ async def lifespan(app: FastAPI):
         logger.info(f"🔍 등록된 서비스들: {list(app.state.service_discovery.registry.keys())}")
     
     yield
-    logger.info("🛑 Gateway API 서비스 종료")
+    logger.info("�� Gateway API 서비스 종료")
 
 app = FastAPI(
     title="Gateway API",
@@ -129,7 +129,7 @@ app.add_middleware(AuthMiddleware)
 # 모든 요청 로깅 미들웨어 추가
 @app.middleware("http")
 async def log_all_requests(request: Request, call_next):
-    logger.info(f"🌐 모든 요청 로깅: {request.method} {request.url.path}")
+    logger.info(f"�� 모든 요청 로깅: {request.method} {request.url.path}")
     logger.info(f"🌐 요청 헤더: {dict(request.headers)}")
     
     # 응답 처리
@@ -142,21 +142,16 @@ async def log_all_requests(request: Request, call_next):
 FORWARD_BASE_PATH = "api/v1"
 # ================================================================
 
-# 라우터 생성 및 등록
+# 라우터 생성
 logger.info("🔧 Gateway 라우터 생성 시작...")
 gateway_router = APIRouter(tags=["Gateway API"])
 
 # 라우터 등록 확인 로그
 logger.info("🔧 Gateway 라우터 생성 완료")
 logger.info(f"🔧 라우터 prefix: {gateway_router.prefix}")
-logger.info(f"🔧 라우터 tags: {gateway_router.tags}")
+logger.info(f"�� 라우터 tags: {gateway_router.tags}")
 
-# 라우터 등록
-logger.info("🔧 라우터 등록 중...")
-app.include_router(gateway_router)
-logger.info("✅ Gateway 라우터 등록 완료")
-
-# 🪡🪡🪡 파일이 필요한 서비스 목록 (현재는 없음)
+# ������ 파일이 필요한 서비스 목록 (현재는 없음)
 FILE_REQUIRED_SERVICES = set()
 
 
@@ -200,12 +195,12 @@ async def proxy_post(
     sheet_names: Optional[List[str]] = Query(None, alias="sheet_name")
 ):
     logger.info(f"🚀 POST 프록시 함수 시작! service={service}, path={path}")
-    logger.info("🚀 POST 프록시 함수 시작!")
+    logger.info("�� POST 프록시 함수 시작!")
     logger.info(f"🚀 요청 URL: {request.url}")
     logger.info(f"🚀 요청 메서드: {request.method}")
     logger.info(f"🚀 요청 경로: {request.url.path}")
-    logger.info(f"🚀 서비스 파라미터: {service}")
-    logger.info(f"🚀 경로 파라미터: {path}")
+    logger.info(f"�� 서비스 파라미터: {service}")
+    logger.info(f"�� 경로 파라미터: {path}")
     try:
         logger.info(f"🔍 Gateway POST 요청: service={service}, path={path}")
         logger.info(f"📤 요청 URL: /api/v1/{service}/{path}")
@@ -343,7 +338,7 @@ async def proxy_patch(service: ServiceType, path: str, request: Request):
         # ===== [수정] 내부로 넘길 경로 재작성 =====
         # auth-service는 /signup만 처리하므로 path만 전달
         forward_path = path
-        logger.info(f"🎯 최종 전달 경로(PATCH): {forward_path}")
+        logger.info(f"�� 최종 전달 경로(PATCH): {forward_path}")
 
         response = await service_discovery.request(
             method="PATCH",
@@ -360,8 +355,13 @@ async def proxy_patch(service: ServiceType, path: str, request: Request):
             status_code=500
         )
 
+# 라우터 등록 (모든 엔드포인트 정의 후)
+logger.info("�� 라우터 등록 중...")
+app.include_router(gateway_router)
+logger.info("✅ Gateway 라우터 등록 완료")
+
 # 라우트 등록 확인 (모든 라우트 함수 정의 후)
-logger.info("🔍 등록된 라우트들:")
+logger.info("�� 등록된 라우트들:")
 post_routes_found = 0
 for route in app.routes:
     if hasattr(route, 'path'):
@@ -369,7 +369,7 @@ for route in app.routes:
         if 'POST' in route.methods and '{service}' in route.path:
             post_routes_found += 1
             logger.info(f"🎯 POST 동적 라우트 발견: {route.path}")
-            logger.info(f"🎯 라우트 함수: {route.endpoint.__name__ if hasattr(route, 'endpoint') else 'Unknown'}")
+            logger.info(f"�� 라우트 함수: {route.endpoint.__name__ if hasattr(route, 'endpoint') else 'Unknown'}")
             logger.info(f"🎯 라우트 엔드포인트: {route.endpoint}")
 
 logger.info(f"🎯 총 POST 동적 라우트 개수: {post_routes_found}")
@@ -380,15 +380,15 @@ for route in gateway_router.routes:
         logger.info(f"  - {route.methods} {route.path}")
 
 logger.info("🔍 서비스 등록 상태 확인:")
-logger.info(f"🔍 ServiceType.AUTH = {ServiceType.AUTH}")
+logger.info(f"�� ServiceType.AUTH = {ServiceType.AUTH}")
 logger.info(f"🔍 ServiceType.AUTH.value = {ServiceType.AUTH.value}")
 logger.info(f"🔍 ServiceType.AUTH == 'auth': {ServiceType.AUTH == 'auth'}")
 logger.info(f"🔍 'auth' in ServiceType: {'auth' in [s.value for s in ServiceType]}")
 
-logger.info("🔍 라우트 매칭 테스트:")
+logger.info("�� 라우트 매칭 테스트:")
 test_path = "/api/v1/auth/signup"
-logger.info(f"🔍 테스트 경로: {test_path}")
-logger.info(f"🔍 경로에서 service 추출: {test_path.split('/')[3] if len(test_path.split('/')) > 3 else 'N/A'}")
+logger.info(f"�� 테스트 경로: {test_path}")
+logger.info(f"�� 경로에서 service 추출: {test_path.split('/')[3] if len(test_path.split('/')) > 3 else 'N/A'}")
 logger.info(f"🔍 경로에서 path 추출: {test_path.split('/')[4:] if len(test_path.split('/')) > 4 else 'N/A'}")
 
 @app.exception_handler(404)
@@ -401,9 +401,9 @@ async def not_found_handler(request: Request, exc):
     logger.error(f"🚨 요청 헤더: {dict(request.headers)}")
     
     path_parts = request.url.path.split('/')
-    logger.error(f"🚨 경로 파싱: {path_parts}")
+    logger.error(f"�� 경로 파싱: {path_parts}")
     if len(path_parts) >= 5:
-        logger.error(f"🚨 추출된 service: {path_parts[3]}")
+        logger.error(f"�� 추출된 service: {path_parts[3]}")
         logger.error(f"🚨 추출된 path: {path_parts[4:]}")
         logger.error(f"🚨 ServiceType.AUTH.value: {ServiceType.AUTH.value}")
         logger.error(f"🚨 service 매칭 여부: {path_parts[3] == ServiceType.AUTH.value}")
@@ -413,7 +413,7 @@ async def not_found_handler(request: Request, exc):
         if hasattr(route, 'path'):
             logger.error(f"  - {route.methods} {route.path}")
     
-    logger.error(f"🚨 gateway_router 라우트들:")
+    logger.error(f"�� gateway_router 라우트들:")
     for route in gateway_router.routes:
         if hasattr(route, 'path'):
             logger.error(f"  - {route.methods} {route.path}")
