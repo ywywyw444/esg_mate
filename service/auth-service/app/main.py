@@ -6,8 +6,9 @@ import logging
 import sys
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager
+from typing import List
 
-from fastapi import FastAPI, Request, Depends
+from fastapi import FastAPI, Request, Depends, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 # SQLAlchemy AsyncSession 강제 import
@@ -16,7 +17,6 @@ try:
     print("✅ AsyncSession import 성공")
 except ImportError as e:
     print(f"❌ AsyncSession import 실패: {e}")
-    # 대체 방법
     import sqlalchemy.ext.asyncio
     AsyncSession = sqlalchemy.ext.asyncio.AsyncSession
     print("✅ AsyncSession 대체 import 성공")
@@ -43,6 +43,7 @@ from app.common.database.database import get_db, create_tables, test_connection
 from app.domain.auth.service.signup_service import SignupService
 from app.domain.auth.service.login_service import LoginService
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("🚀 Auth Service 시작")
@@ -55,10 +56,8 @@ async def lifespan(app: FastAPI):
     try:
         db_connected = await test_connection()
         if db_connected:
-            # 환경변수로 초기화 제어 (기본값: True)
             should_init_db = os.getenv("INIT_DATABASE", "true").lower() == "true"
             if should_init_db:
-                # 테이블 생성
                 await create_tables()
                 logger.info("✅ Railway 데이터베이스 초기화 완료")
             else:
@@ -67,9 +66,10 @@ async def lifespan(app: FastAPI):
             logger.warning("⚠️ Railway 데이터베이스 연결 실패 - 서비스는 계속 실행됩니다")
     except Exception as e:
         logger.warning(f"⚠️ 데이터베이스 초기화 중 오류 (서비스는 계속 실행): {str(e)}")
-    
+
     yield
-    logger.info("�� Auth Service 종료")
+    logger.info("🛑 Auth Service 종료")
+
 
 # FastAPI 앱 생성
 app = FastAPI(
@@ -79,26 +79,44 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS 미들웨어 설정
+# ---------- CORS 설정 (핵심 수정) ----------
+# '*' 제거: credentials(true)와 함께 쓰면 브라우저가 거부합니다.
+def parse_origins() -> List[str]:
+    # 환경변수로도 확장 가능: CORS_ORIGINS="https://a.com,https://b.com"
+    extra = os.getenv("CORS_ORIGINS", "")
+    extra_list = [o.strip() for o in extra.split(",") if o.strip()]
+    base = [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:3001",
+        "http://frontend:3000",
+        "https://www.kangyouwon.com",
+        "https://kangyouwon.com",
+        "https://esg-mate-iq7qhquuv-ywyw74s-projects.vercel.app",
+        "https://esg-mate.vercel.app",
+    ]
+    # Railway 자체 도메인은 Origin이 되지 않으므로 굳이 필요 없음
+    return list(dict.fromkeys(base + extra_list))
+
+ALLOWED_ORIGINS = parse_origins()
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",  # 로컬 접근
-        "http://localhost:3001",  # 로컬 접근 (포트 3001)
-        "http://127.0.0.1:3000",  # 로컬 IP 접근
-        "http://127.0.0.1:3001",  # 로컬 IP 접근 (포트 3001)
-        "http://frontend:3000",   # Docker 내부 네트워크
-        "https://www.kangyouwon.com",  # 프로덕션 도메인
-        "https://kangyouwon.com",      # 프로덕션 도메인 (www 없이)
-        "https://auth-service-production-1deb.up.railway.app",  # Railway auth-service
-        "https://esg-mate-iq7qhquuv-ywyw74s-projects.vercel.app",  # Vercel 프론트엔드
-        "https://esg-mate.vercel.app",  # Vercel 메인 도메인
-        "*"  # 개발 환경에서 모든 origin 허용
-    ],
+    allow_origins=ALLOWED_ORIGINS,
+    # 프리뷰 브랜치 vercel.app 전체 허용(원하면 제거 가능)
+    allow_origin_regex=r"^https:\/\/[a-z0-9-]+\.vercel\.app$",
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
 )
+
+# (선택) 일부 환경에서 OPTIONS가 다른 미들웨어에 가로막히는 걸 대비한 프리플라이트 핸들러
+@app.options("/{rest_of_path:path}")
+async def preflight_handler(rest_of_path: str):
+    return Response(status_code=204)
+# -----------------------------------------
+
 
 @app.get("/")
 async def root():
@@ -118,35 +136,24 @@ async def login():
 
 @app.post("/login")
 async def login_process(request: Request, db=Depends(get_db)):
-    # 함수 내에서 AsyncSession 타입 힌트 재정의
     from sqlalchemy.ext.asyncio import AsyncSession
     db: AsyncSession = db
     logger.info("🔐 로그인 POST 요청 받음")
     try:
-        # 요청 본문에서 formData 읽기
         form_data = await request.json()
         logger.info(f"로그인 시도: {form_data.get('auth_id', 'N/A')}")
-        
-        # 필수 필드 검증
+
         required_fields = ['auth_id', 'auth_pw']
-        missing_fields = [field for field in required_fields if not form_data.get(field)]
-        
+        missing_fields = [f for f in required_fields if not form_data.get(f)]
         if missing_fields:
             logger.warning(f"필수 필드 누락: {missing_fields}")
-            return {
-                "success": False,
-                "message": f"필수 필드가 누락되었습니다: {', '.join(missing_fields)}"
-            }
-        
-        # LoginService를 통한 인증
+            return {"success": False, "message": f"필수 필드가 누락되었습니다: {', '.join(missing_fields)}"}
+
         result = await LoginService.authenticate_user(
-            db, 
-            form_data['auth_id'], 
-            form_data['auth_pw']
+            db, form_data['auth_id'], form_data['auth_pw']
         )
-        
         return result
-        
+
     except Exception as e:
         logger.error(f"로그인 처리 중 오류: {str(e)}")
         return {"success": False, "message": f"로그인 처리 중 오류가 발생했습니다: {str(e)}"}
@@ -157,26 +164,18 @@ async def signup():
 
 @app.post("/signup")
 async def signup_process(request: Request, db=Depends(get_db)):
-    # 함수 내에서 AsyncSession 타입 힌트 재정의
     from sqlalchemy.ext.asyncio import AsyncSession
     db: AsyncSession = db
     logger.info("📝 회원가입 POST 요청 받음")
     try:
-        # 요청 본문에서 formData 읽기
         form_data = await request.json()
-        
-        # 필수 필드 검증
+
         required_fields = ['company_id', 'industry', 'email', 'name', 'age', 'auth_id', 'auth_pw']
-        missing_fields = [field for field in required_fields if not form_data.get(field)]
-        
+        missing_fields = [f for f in required_fields if not form_data.get(f)]
         if missing_fields:
             logger.warning(f"필수 필드 누락: {missing_fields}")
-            return {
-                "회원가입": "실패",
-                "message": f"필수 필드가 누락되었습니다: {', '.join(missing_fields)}"
-            }
-        
-        # 새로운 컬럼명에 맞춰 로그 출력
+            return {"회원가입": "실패", "message": f"필수 필드가 누락되었습니다: {', '.join(missing_fields)}"}
+
         logger.info("=== 회원가입 요청 데이터 ===")
         logger.info(f"회사 ID: {form_data.get('company_id', 'N/A')}")
         logger.info(f"산업: {form_data.get('industry', 'N/A')}")
@@ -186,10 +185,9 @@ async def signup_process(request: Request, db=Depends(get_db)):
         logger.info(f"인증 ID: {form_data.get('auth_id', 'N/A')}")
         logger.info(f"인증 비밀번호: [PROTECTED]")
         logger.info("==========================")
-        
-        # PostgreSQL에 사용자 저장
+
         result = await SignupService.create_user(db, form_data)
-        
+
         if result["success"]:
             logger.info(f"✅ 회원가입 성공: {form_data['email']}")
             return {
@@ -200,16 +198,12 @@ async def signup_process(request: Request, db=Depends(get_db)):
             }
         else:
             logger.warning(f"❌ 회원가입 실패: {result['message']}")
-            return {
-                "success": False,
-                "message": result["message"]
-            }
-            
+            return {"success": False, "message": result["message"]}
+
     except Exception as e:
         logger.error(f"회원가입 처리 중 오류: {str(e)}")
         return {"회원가입": "실패", "오류": str(e)}
 
 if __name__ == "__main__":
     import uvicorn
-    port = int(PORT)
-    uvicorn.run("app.main:app", host="0.0.0.0", port=port, reload=True)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=int(PORT), reload=True)
