@@ -49,7 +49,7 @@ export default function SignupPage() {
     
     // Gateway를 통해 auth-service로 요청
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.kangyouwon.com';
-    axios.post(`${apiUrl}/v1/auth-service/signup`, formData)
+    axios.post(`${apiUrl}/api/v1/auth-service/signup`, formData)
       .then(response => {
         console.log('Signup successful:', response.data);
         
