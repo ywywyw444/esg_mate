@@ -11,6 +11,7 @@ restartPolicyType = "on_failure"
 NODE_ENV = "production"
 PYTHON_VERSION = "3.11"
 PYTHONPATH = "/app/gateway"
+PORT = "$PORT"
 
 # 서비스별 설정
 [deploy.services]
