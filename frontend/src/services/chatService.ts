@@ -16,7 +16,7 @@ export const chatService = {
   // 메시지 전송 (gateway를 통해 chat-service로 전달)
   sendMessage: async (message: string): Promise<ChatResponse> => {
     try {
-      const response = await api.post('/api/v1/chatbot-service/chat', { message });
+              const response = await api.post('/api/v1/chatbot/chat', { message });
       return response.data;
     } catch (error) {
       console.error('채팅 메시지 전송 오류:', error);

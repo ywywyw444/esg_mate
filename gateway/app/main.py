@@ -60,18 +60,18 @@ async def lifespan(app: FastAPI):
         
         # Railway 프로덕션 환경
         app.state.service_discovery.register_service(
-            service_name="chatbot-service",
+            service_name="chatbot",
             instances=[{"host": "chatbot-service-production-1deb.up.railway.app", "port": 443, "weight": 1}],
             load_balancer_type="round_robin"
         )
-        logger.info("✅ chatbot-service 등록 완료")
+        logger.info("✅ chatbot 등록 완료")
         
         app.state.service_discovery.register_service(
-            service_name="auth-service",
+            service_name="auth",
             instances=[{"host": "auth-service-production-1deb.up.railway.app", "port": 443, "weight": 1}],
             load_balancer_type="round_robin"
         )
-        logger.info("✅ auth-service 등록 완료")
+        logger.info("✅ auth 등록 완료")
         
         # 등록된 서비스 확인
         logger.info(f"🔍 등록된 서비스들: {list(app.state.service_discovery.registry.keys())}")
@@ -80,18 +80,18 @@ async def lifespan(app: FastAPI):
         
         # 로컬 개발 환경
         app.state.service_discovery.register_service(
-            service_name="chatbot-service",
+            service_name="chatbot",
             instances=[{"host": "chatbot-service", "port": 8006, "weight": 1}],
             load_balancer_type="round_robin"
         )
-        logger.info("✅ chatbot-service 등록 완료")
+        logger.info("✅ chatbot 등록 완료")
         
         app.state.service_discovery.register_service(
-            service_name="auth-service",
+            service_name="auth",
             instances=[{"host": "auth-service", "port": 8008, "weight": 1}],
             load_balancer_type="round_robin"
         )
-        logger.info("✅ auth-service 등록 완료")
+        logger.info("✅ auth 등록 완료")
         
             # 등록된 서비스 확인
     logger.info(f"🔍 등록된 서비스들: {list(app.state.service_discovery.registry.keys())}")

@@ -42,7 +42,7 @@ export default function LoginPage() {
     
     // Gateway를 통해 auth-service로 요청
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://gateway-production-1104.up.railway.app';
-    axios.post(`${apiUrl}/api/v1/auth-service/login`, formData)
+                axios.post(`${apiUrl}/api/v1/auth/login`, formData)
       .then(response => {
         console.log('Login response:', response.data);
         
