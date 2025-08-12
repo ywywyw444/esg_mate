@@ -22,12 +22,6 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "AI 채팅 어시스턴트",
   description: "무엇이든 물어보세요",
-  manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "AI 채팅 어시스턴트",
-  },
 };
 
 export default function RootLayout({
