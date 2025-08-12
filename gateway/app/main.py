@@ -7,13 +7,13 @@ import logging
 import sys
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager
-from fastapi import Request
 
 from app.www.jwt_auth_middleware import AuthMiddleware
 from app.domain.discovery.service_discovery import ServiceDiscovery
 from app.domain.discovery.service_type import ServiceType
 from app.common.utility.constant.settings import Settings
 from app.common.utility.factory.response_factory import ResponseFactory
+
 # Gateway는 DB에 직접 접근하지 않음 (MSA 원칙)
 
 if os.getenv("RAILWAY_ENVIRONMENT") != "true":
@@ -93,8 +93,8 @@ async def lifespan(app: FastAPI):
         )
         logger.info("✅ auth 등록 완료")
         
-            # 등록된 서비스 확인
-    logger.info(f"🔍 등록된 서비스들: {list(app.state.service_discovery.registry.keys())}")
+        # 등록된 서비스 확인
+        logger.info(f"🔍 등록된 서비스들: {list(app.state.service_discovery.registry.keys())}")
     
     yield
     logger.info("🛑 Gateway API 서비스 종료")
@@ -437,7 +437,6 @@ async def health_check_db():
     }
 
 # Gateway는 순수한 라우팅만 담당 (MSA 원칙)
-
 
 # ✅ 서버 실행
 if __name__ == "__main__":
