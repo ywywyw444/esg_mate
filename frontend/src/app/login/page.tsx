@@ -91,7 +91,7 @@ export default function LoginPage() {
             </div>
 
             {/* Login Form */}
-            <div className="space-y-8">
+            <form onSubmit={handleLogin} className="space-y-8">
               {/* Auth ID Input */}
               <div className="relative">
                 <input
@@ -184,13 +184,13 @@ export default function LoginPage() {
                     </svg>
                   </button>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+                             </div>
+             </form>
+           </div>
+         </div>
+       </div>
+     );
+   }
 
-  return null;
-}
+   return null;
+ }

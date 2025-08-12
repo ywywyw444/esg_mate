@@ -282,7 +282,7 @@ async def proxy_post(
             status_code=500
         )
 
-@gateway_router.put("/{service}/{path:path}", summary="PUT 프록시")
+@gateway_router.put("/api/v1/{service}/{path:path}", summary="PUT 프록시")
 async def proxy_put(service: ServiceType, path: str, request: Request):
     try:
         service_discovery = request.app.state.service_discovery
@@ -308,7 +308,7 @@ async def proxy_put(service: ServiceType, path: str, request: Request):
             status_code=500
         )
 
-@gateway_router.delete("/{service}/{path:path}", summary="DELETE 프록시")
+@gateway_router.delete("/api/v1/{service}/{path:path}", summary="DELETE 프록시")
 async def proxy_delete(service: ServiceType, path: str, request: Request):
     try:
         service_discovery = request.app.state.service_discovery
@@ -334,7 +334,7 @@ async def proxy_delete(service: ServiceType, path: str, request: Request):
             status_code=500
         )
 
-@gateway_router.patch("/{service}/{path:path}", summary="PATCH 프록시")
+@gateway_router.patch("/api/v1/{service}/{path:path}", summary="PATCH 프록시")
 async def proxy_patch(service: ServiceType, path: str, request: Request):
     try:
         service_discovery = request.app.state.service_discovery
