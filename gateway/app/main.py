@@ -36,8 +36,26 @@ async def lifespan(app: FastAPI):
     # 서비스 디스커버리 초기화 및 서비스 등록
     app.state.service_discovery = ServiceDiscovery()
     
-    # Railway 환경에서는 실제 서비스 URL 사용
-    if os.getenv("RAILWAY_ENVIRONMENT") == "true":
+    # Railway 환경 감지 (여러 방법으로 확인)
+    railway_env = os.getenv("RAILWAY_ENVIRONMENT")
+    railway_service_name = os.getenv("RAILWAY_SERVICE_NAME")
+    railway_project_id = os.getenv("RAILWAY_PROJECT_ID")
+    port = os.getenv("PORT", "8080")
+    
+    logger.info(f"🔍 환경변수 확인: RAILWAY_ENVIRONMENT={railway_env}")
+    logger.info(f"🔍 환경변수 확인: RAILWAY_SERVICE_NAME={railway_service_name}")
+    logger.info(f"🔍 환경변수 확인: RAILWAY_PROJECT_ID={railway_project_id}")
+    logger.info(f"🔍 환경변수 확인: PORT={port}")
+    
+    # Railway 환경에서는 실제 서비스 URL 사용 (PORT가 8080이 아닌 경우도 포함)
+    is_railway = (railway_env == "true" or 
+                  railway_service_name or 
+                  railway_project_id or 
+                  port != "8080")
+    
+    logger.info(f"🔍 Railway 환경 감지 결과: {is_railway}")
+    
+    if is_railway:
         logger.info("🚀 Railway 프로덕션 환경에서 서비스 등록 중...")
         
         # Railway 프로덕션 환경
@@ -109,7 +127,21 @@ app.add_middleware(
 app.add_middleware(AuthMiddleware)
 
 gateway_router = APIRouter(prefix="/api/v1", tags=["Gateway API"])
+
+# 라우터 등록 확인 로그
+logger.info("🔧 Gateway 라우터 생성 완료")
+logger.info(f"🔧 라우터 prefix: {gateway_router.prefix}")
+logger.info(f"🔧 라우터 tags: {gateway_router.tags}")
+
+# 라우터 등록
 app.include_router(gateway_router)
+logger.info("✅ Gateway 라우터 등록 완료")
+
+# 등록된 라우트 확인
+logger.info("🔍 등록된 라우트들:")
+for route in app.routes:
+    if hasattr(route, 'path'):
+        logger.info(f"  - {route.methods} {route.path}")
 
 # 🪡🪡🪡 파일이 필요한 서비스 목록 (현재는 없음)
 FILE_REQUIRED_SERVICES = set()
@@ -121,6 +153,7 @@ async def proxy_get(
     path: str, 
     request: Request
 ):
+    logger.info("🚀 GET 프록시 함수 시작!")
     try:
         # app.state에서 service_discovery 가져오기
         service_discovery = request.app.state.service_discovery
@@ -150,6 +183,7 @@ async def proxy_post(
     file: Optional[UploadFile] = None,
     sheet_names: Optional[List[str]] = Query(None, alias="sheet_name")
 ):
+    logger.info("🚀 POST 프록시 함수 시작!")
     try:
         # 디버깅 로그 추가
         logger.info(f"🔍 Gateway POST 요청: service={service}, path={path}")
@@ -319,8 +353,6 @@ async def proxy_patch(service: ServiceType, path: str, request: Request):
             status_code=500
         )
 
-# ✅ 메인 라우터 등록 (동적 라우팅)
-# app.include_router(gateway_router) # 중복된 라우터 등록 제거
 
 # 404 에러 핸들러
 @app.exception_handler(404)
