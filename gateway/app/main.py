@@ -9,7 +9,6 @@ from dotenv import load_dotenv
 from contextlib import asynccontextmanager
 from fastapi import Request
 
-from app.router.auth_router import router as auth_router
 from app.www.jwt_auth_middleware import AuthMiddleware
 from app.domain.discovery.service_discovery import ServiceDiscovery
 from app.domain.discovery.service_type import ServiceType
@@ -39,31 +38,45 @@ async def lifespan(app: FastAPI):
     
     # Railway 환경에서는 실제 서비스 URL 사용
     if os.getenv("RAILWAY_ENVIRONMENT") == "true":
+        logger.info("🚀 Railway 프로덕션 환경에서 서비스 등록 중...")
+        
         # Railway 프로덕션 환경
         app.state.service_discovery.register_service(
             service_name="chatbot-service",
             instances=[{"host": "chatbot-service-production-1deb.up.railway.app", "port": 443, "weight": 1}],
             load_balancer_type="round_robin"
         )
+        logger.info("✅ chatbot-service 등록 완료")
         
         app.state.service_discovery.register_service(
             service_name="auth-service",
             instances=[{"host": "auth-service-production-1deb.up.railway.app", "port": 443, "weight": 1}],
             load_balancer_type="round_robin"
         )
+        logger.info("✅ auth-service 등록 완료")
+        
+        # 등록된 서비스 확인
+        logger.info(f"🔍 등록된 서비스들: {list(app.state.service_discovery.registry.keys())}")
     else:
+        logger.info("🚀 로컬 개발 환경에서 서비스 등록 중...")
+        
         # 로컬 개발 환경
         app.state.service_discovery.register_service(
             service_name="chatbot-service",
             instances=[{"host": "chatbot-service", "port": 8006, "weight": 1}],
             load_balancer_type="round_robin"
         )
+        logger.info("✅ chatbot-service 등록 완료")
         
         app.state.service_discovery.register_service(
             service_name="auth-service",
             instances=[{"host": "auth-service", "port": 8008, "weight": 1}],
             load_balancer_type="round_robin"
         )
+        logger.info("✅ auth-service 등록 완료")
+        
+        # 등록된 서비스 확인
+        logger.info(f"🔍 등록된 서비스들: {list(app.state.service_discovery.registry.keys())}")
     
     yield
     logger.info("🛑 Gateway API 서비스 종료")
@@ -96,19 +109,10 @@ app.add_middleware(
 app.add_middleware(AuthMiddleware)
 
 gateway_router = APIRouter(prefix="/api/v1", tags=["Gateway API"])
-gateway_router.include_router(auth_router)
-# 필요시: gateway_router.include_router(user_router)
 app.include_router(gateway_router)
-
-# 동적 라우팅을 위한 별도 라우터
-dynamic_router = APIRouter(prefix="/api/v1", tags=["Dynamic Routing"])
-app.include_router(dynamic_router)
 
 # 🪡🪡🪡 파일이 필요한 서비스 목록 (현재는 없음)
 FILE_REQUIRED_SERVICES = set()
-
-
-
 
 
 @gateway_router.get("/{service}/{path:path}", summary="GET 프록시")
@@ -158,10 +162,12 @@ async def proxy_post(
         instance = service_discovery.get_service_instance(str(service))
         if instance:
             logger.info(f"✅ 서비스 인스턴스 찾음: {instance.host}:{instance.port}")
-            logger.info(f"🎯 최종 요청 URL: http://{instance.host}:{instance.port}/{path}")
+            logger.info(f"🎯 최종 요청 URL: {instance.url}/{path}")
         else:
             logger.error(f"❌ 서비스 인스턴스를 찾을 수 없음: {service}")
             logger.error(f"🔍 등록된 서비스들: {list(service_discovery.registry.keys())}")
+            logger.error(f"🔍 요청된 서비스: {service}")
+            logger.error(f"🔍 서비스 타입: {type(service)}")
             return JSONResponse(
                 content={"detail": f"Service {service} not available"},
                 status_code=503

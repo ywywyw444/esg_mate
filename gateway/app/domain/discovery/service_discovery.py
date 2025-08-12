@@ -117,16 +117,22 @@ class ServiceDiscovery:
         logger.info(f"Service {service_name} registered with {len(service_instances)} instances")
     
     def get_service_instance(self, service_name: str) -> Optional[ServiceInstance]:
+        logger.info(f"🔍 get_service_instance 호출: service_name={service_name}")
+        logger.info(f"🔍 현재 등록된 서비스들: {list(self.registry.keys())}")
+        
         if service_name not in self.registry:
-            logger.warning(f"Service {service_name} not found in registry")
+            logger.warning(f"❌ Service {service_name} not found in registry")
+            logger.warning(f"🔍 Available services: {list(self.registry.keys())}")
             return None
         
         service = self.registry[service_name]
         instances = service["instances"]
         load_balancer_type = service["load_balancer_type"]
         
+        logger.info(f"✅ Service {service_name} found with {len(instances)} instances")
+        
         if not instances:
-            logger.warning(f"No instances available for service {service_name}")
+            logger.warning(f"❌ No instances available for service {service_name}")
             return None
         
         load_balancer = self.load_balancers.get(load_balancer_type, LoadBalancer.round_robin)
@@ -134,7 +140,9 @@ class ServiceDiscovery:
         
         if instance:
             instance.connection_count += 1
-            logger.debug(f"Selected instance {instance.host}:{instance.port} for service {service_name}")
+            logger.info(f"✅ Selected instance {instance.host}:{instance.port} for service {service_name}")
+        else:
+            logger.error(f"❌ Failed to select instance for service {service_name}")
         
         return instance
     
