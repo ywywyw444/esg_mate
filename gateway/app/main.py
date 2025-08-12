@@ -68,7 +68,7 @@ async def lifespan(app: FastAPI):
         
         app.state.service_discovery.register_service(
             service_name="auth",
-            instances=[{"host": "auth-service-production-1deb.up.railway.app", "port": 443, "weight": 1}],
+            instances=[{"host": "auth-service-production-f2ef.up.railway.app", "port": 443, "weight": 1}],
             load_balancer_type="round_robin"
         )
         logger.info("✅ auth 등록 완료")
@@ -144,7 +144,7 @@ FORWARD_BASE_PATH = "api/v1"
 
 # 라우터 생성 및 등록
 logger.info("🔧 Gateway 라우터 생성 시작...")
-gateway_router = APIRouter(prefix="/api/v1", tags=["Gateway API"])
+gateway_router = APIRouter(tags=["Gateway API"])
 
 # 라우터 등록 확인 로그
 logger.info("🔧 Gateway 라우터 생성 완료")
@@ -156,14 +156,11 @@ logger.info("🔧 라우터 등록 중...")
 app.include_router(gateway_router)
 logger.info("✅ Gateway 라우터 등록 완료")
 
-# 라우터 등록 완료
-logger.info("✅ Gateway 라우터 등록 완료")
-
 # 🪡🪡🪡 파일이 필요한 서비스 목록 (현재는 없음)
 FILE_REQUIRED_SERVICES = set()
 
 
-@gateway_router.get("/{service}/{path:path}", summary="GET 프록시")
+@gateway_router.get("/api/v1/{service}/{path:path}", summary="GET 프록시")
 async def proxy_get(
     service: ServiceType, 
     path: str, 
@@ -194,7 +191,7 @@ async def proxy_get(
         )
 
 # 파일 업로드 및 일반 JSON 요청 모두 처리, JWT 적용
-@gateway_router.post("/{service}/{path:path}", summary="POST 프록시")
+@gateway_router.post("/api/v1/{service}/{path:path}", summary="POST 프록시")
 async def proxy_post(
     service: ServiceType, 
     path: str,
