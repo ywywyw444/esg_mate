@@ -40,9 +40,17 @@ async def lifespan(app: FastAPI):
     auth_service_url = os.getenv("AUTH_SERVICE_URL", "https://auth-service-production-f2ef.up.railway.app")
     logger.info(f"🔧 Auth 서비스 URL: {auth_service_url}")
     
+    # URL에서 host와 port 추출
+    from urllib.parse import urlparse
+    parsed_url = urlparse(auth_service_url)
+    host = parsed_url.hostname
+    port = parsed_url.port or (443 if parsed_url.scheme == 'https' else 80)
+    
+    logger.info(f"🔧 파싱된 host: {host}, port: {port}")
+    
     app.state.service_discovery.register_service(
         service_name="auth",
-        instances=[{"host": auth_service_url, "port": 443, "weight": 1}],
+        instances=[{"host": host, "port": port, "weight": 1}],
         load_balancer_type="round_robin"
     )
     logger.info("✅ auth 서비스 등록 완료")
