@@ -55,12 +55,18 @@ export default function LoginPage() {
       } else {
         alert(`❌ ${response.data.message}`);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Login failed:', error);
       
-      // 에러 응답 처리
-      if (error.response && error.response.data) {
-        alert(`❌ 로그인 실패: ${error.response.data.message || error.response.data.detail || '알 수 없는 오류'}`);
+      // 에러 응답 처리 - 타입 가드 사용
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { data?: { message?: string; detail?: string } } };
+        if (axiosError.response?.data) {
+          const errorData = axiosError.response.data;
+          alert(`❌ 로그인 실패: ${errorData.message || errorData.detail || '알 수 없는 오류'}`);
+        } else {
+          alert('❌ 로그인에 실패했습니다. 서버 연결을 확인해주세요.');
+        }
       } else {
         alert('❌ 로그인에 실패했습니다. 서버 연결을 확인해주세요.');
       }

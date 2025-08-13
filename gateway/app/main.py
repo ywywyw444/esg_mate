@@ -106,7 +106,7 @@ FORWARD_BASE_PATH = "api/v1"
 
 # 라우터 생성
 logger.info("🔧 Gateway 라우터 생성 시작...")
-gateway_router = APIRouter(tags=["Gateway API"])
+gateway_router = APIRouter(tags=["Gateway API"], prefix="/api/v1")
 
 # 라우터 등록 확인 로그
 logger.info("🔧 Gateway 라우터 생성 완료")
@@ -117,7 +117,7 @@ logger.info(f"�� 라우터 tags: {gateway_router.tags}")
 FILE_REQUIRED_SERVICES = set()
 
 
-@gateway_router.get("/api/v1/{service}/{path:path}", summary="GET 프록시")
+@gateway_router.get("/{service}/{path:path}", summary="GET 프록시")
 async def proxy_get(
     service: ServiceType, 
     path: str, 
@@ -148,7 +148,7 @@ async def proxy_get(
         )
 
 # 파일 업로드 및 일반 JSON 요청 모두 처리, JWT 적용
-@gateway_router.post("/api/v1/{service}/{path:path}", summary="POST 프록시")
+@gateway_router.post("/{service}/{path:path}", summary="POST 프록시")
 async def proxy_post(
     service: ServiceType, 
     path: str,
@@ -165,7 +165,7 @@ async def proxy_post(
     logger.info(f"�� 경로 파라미터: {path}")
     try:
         logger.info(f"🔍 Gateway POST 요청: service={service}, path={path}")
-        logger.info(f"📤 요청 URL: /api/v1/{service}/{path}")
+        logger.info(f"📤 요청 URL: /{service}/{path}")
         
         service_discovery = request.app.state.service_discovery
         
@@ -243,7 +243,7 @@ async def proxy_post(
             status_code=500
         )
 
-@gateway_router.put("/api/v1/{service}/{path:path}", summary="PUT 프록시")
+@gateway_router.put("/{service}/{path:path}", summary="PUT 프록시")
 async def proxy_put(service: ServiceType, path: str, request: Request):
     try:
         service_discovery = request.app.state.service_discovery
@@ -269,7 +269,7 @@ async def proxy_put(service: ServiceType, path: str, request: Request):
             status_code=500
         )
 
-@gateway_router.delete("/api/v1/{service}/{path:path}", summary="DELETE 프록시")
+@gateway_router.delete("/{service}/{path:path}", summary="DELETE 프록시")
 async def proxy_delete(service: ServiceType, path: str, request: Request):
     try:
         service_discovery = request.app.state.service_discovery
@@ -295,7 +295,7 @@ async def proxy_delete(service: ServiceType, path: str, request: Request):
             status_code=500
         )
 
-@gateway_router.patch("/api/v1/{service}/{path:path}", summary="PATCH 프록시")
+@gateway_router.patch("/{service}/{path:path}", summary="PATCH 프록시")
 async def proxy_patch(service: ServiceType, path: str, request: Request):
     try:
         service_discovery = request.app.state.service_discovery
