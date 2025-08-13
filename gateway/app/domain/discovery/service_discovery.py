@@ -199,67 +199,58 @@ class ServiceDiscovery:
                      data: Dict = None) -> Any:
         """서비스에 요청을 전달하는 메서드"""
         try:
-            # 서비스가 명시적으로 전달된 경우 사용, 아니면 path에서 추출
+            # 1) 서비스명 확정 (ServiceType/str/None 모두 허용)
             if not service:
-                service_name = path.split('/')[0] if path else "chatbot-service"
+                service_name = path.split('/')[0] if path else "chatbot"
             else:
-                # ServiceType enum이면 value를 사용, str이면 그대로 사용
                 service_name = service.value if isinstance(service, ServiceType) else service
-            
-            # 서비스 인스턴스 선택
-            instance = self.get_service_instance(service)
+
+            # 2) 인스턴스 선택 - 반드시 service_name을 사용!
+            instance = self.get_service_instance(service_name)
             if not instance:
                 raise Exception(f"Service {service_name} not available")
-            
-            # 요청 URL 구성 (path가 None이면 서비스 루트로)
-            if path:
-                # auth 서비스의 경우 /login, /signup 등 루트 경로 사용
-                if service_name == "auth":
-                    url = f"{instance.url}/{path}"
-                else:
-                    url = f"{instance.url}/{path}"
-            else:
-                url = instance.url
-            
-            # 요청 파라미터 구성
+
+            # 3) URL 안전 조립 (중복 슬래시 제거)
+            base = instance.url.rstrip("/")
+            rel = (path or "").lstrip("/")
+            url = f"{base}/{rel}" if rel else base
+
+            # 4) 요청 파라미터 구성 (params는 httpx가 자동 인코딩)
             request_kwargs = {
                 "method": method,
                 "url": url,
                 "headers": headers or {},
                 "timeout": 30.0
             }
-            
             if body:
                 request_kwargs["content"] = body
             elif files:
                 request_kwargs["files"] = files
             elif data:
                 request_kwargs["json"] = data
-            
             if params:
                 request_kwargs["params"] = params
-            
-            # 요청 전송
+
             async with httpx.AsyncClient() as client:
                 response = await client.request(**request_kwargs)
-                
-                # 응답 반환
+
                 if response.status_code < 400:
-                    return response.json()
+                    # JSON이 아닐 수도 있으니 예외 안전
+                    try:
+                        return response.json()
+                    except Exception:
+                        return {"status_code": response.status_code, "text": response.text}
                 else:
                     return {
                         "error": True,
                         "status_code": response.status_code,
                         "detail": response.text
                     }
-                    
+
         except Exception as e:
             logger.error(f"Request error: {str(e)}")
-            return {
-                "error": True,
-                "detail": str(e)
-            }
+            return {"error": True, "detail": str(e)}
         finally:
-            # 인스턴스 해제
             if 'instance' in locals():
                 self.release_instance(service_name, instance)
+
