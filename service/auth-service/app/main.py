@@ -50,6 +50,24 @@ app = FastAPI()
 
 app.include_router(auth_router)
 
+# 기본 루트 경로
+@app.get("/")
+async def root():
+    return {
+        "message": "Auth Service API",
+        "version": "0.1.0",
+        "status": "running"
+    }
+
+# 헬스 체크 엔드포인트
+@app.get("/health")
+async def health_check():
+    return {
+        "status": "healthy",
+        "service": "auth-service",
+        "timestamp": "2025-08-13T08:00:00Z"
+    }
+
 
 # 예외 처리 미들웨어 추가
 @app.middleware("http")

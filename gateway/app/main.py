@@ -76,24 +76,26 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+app.add_middleware(AuthMiddleware)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:3000",  # 로컬 접근
-        "http://127.0.0.1:3000",  # 로컬 IP 접근
-        "http://frontend:3000",   # Docker 내부 네트워크
-        "https://www.kangyouwon.com",  # 프로덕션 도메인
-        "https://kangyouwon.com",      # 프로덕션 도메인 (www 없이)
-        "https://esg-mate-lywmmygs7-ywyw74s-projects.vercel.app",  # Vercel 프론트엔드
-        "https://esg-mate.vercel.app",  # Vercel 메인 도메인
-        "*"  # 개발 환경에서 모든 origin 허용
+        "https://www.kangyouwon.com",
+        "https://kangyouwon.com",
+        "https://esg-mate.vercel.app",
+        "https://esg-mate-lywmmygs7-ywyw74s-projects.vercel.app",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://frontend:3000",
+        # "*"  # ← 프로덕션에서는 제거 (allow_credentials=True와 함께 쓰지 말기)
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
 )
 
-app.add_middleware(AuthMiddleware)
+
 
 # 모든 요청 로깅 미들웨어 추가
 @app.middleware("http")
