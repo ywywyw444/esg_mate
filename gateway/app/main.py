@@ -138,9 +138,10 @@ async def proxy_get(
         headers = dict(request.headers)
 
         # ===== [수정] 내부로 넘길 경로 재작성 =====
-        # auth-service는 /api/v1/auth-service 경로를 포함해서 전달
+        # auth-service는 /api/v1/auth 경로를 포함해서 전달
         svc = service.value if isinstance(service, ServiceType) else str(service)
-        forward_path = f"/api/v1/{svc}/{path}"
+        # 서비스 prefix 제거하고 path만 전달 (서비스가 이미 자신의 prefix를 알고 있음)
+        forward_path = f"/api/v1/{path}"
         logger.info(f"🎯 최종 전달 경로(GET): {forward_path}")
 
         response = await service_discovery.request(
@@ -201,7 +202,8 @@ async def proxy_post_json(
 
         # 내부로 넘길 경로
         svc = service.value if isinstance(service, ServiceType) else str(service)
-        forward_path = f"/api/v1/{svc}/{path}"
+        # 서비스 prefix 제거하고 path만 전달 (서비스가 이미 자신의 prefix를 알고 있음)
+        forward_path = f"/api/v1/{path}"
         logger.info(f"🎯 최종 전달 경로(POST, JSON): {forward_path}")
         logger.info(f"🔧 전달할 body 크기: {len(body) if body else 0} bytes")
         logger.info(f"🔧 전달할 headers: {headers}")
@@ -333,9 +335,10 @@ async def proxy_put(service: ServiceType, path: str, request: Request):
         headers = dict(request.headers)
 
         # ===== [수정] 내부로 넘길 경로 재작성 =====
-        # auth-service는 /api/v1/auth-service 경로를 포함해서 전달
+        # auth-service는 /api/v1/auth 경로를 포함해서 전달
         svc = service.value if isinstance(service, ServiceType) else str(service)
-        forward_path = f"/api/v1/{svc}/{path}"
+        # 서비스 prefix 제거하고 path만 전달 (서비스가 이미 자신의 prefix를 알고 있음)
+        forward_path = f"/api/v1/{path}"
         logger.info(f"🎯 최종 전달 경로(PUT): {forward_path}")
 
         response = await service_discovery.request(
@@ -360,9 +363,10 @@ async def proxy_delete(service: ServiceType, path: str, request: Request):
         headers = dict(request.headers)
 
         # ===== [수정] 내부로 넘길 경로 재작성 =====
-        # auth-service는 /api/v1/auth-service 경로를 포함해서 전달
+        # auth-service는 /api/v1/auth 경로를 포함해서 전달
         svc = service.value if isinstance(service, ServiceType) else str(service)
-        forward_path = f"/api/v1/{svc}/{path}"
+        # 서비스 prefix 제거하고 path만 전달 (서비스가 이미 자신의 prefix를 알고 있음)
+        forward_path = f"/api/v1/{path}"
         logger.info(f"🎯 최종 전달 경로(DELETE): {forward_path}")
 
         response = await service_discovery.request(
@@ -387,9 +391,10 @@ async def proxy_patch(service: ServiceType, path: str, request: Request):
         headers = dict(request.headers)
 
         # ===== [수정] 내부로 넘길 경로 재작성 =====
-        # auth-service는 /api/v1/auth-service 경로를 포함해서 전달
+        # auth-service는 /api/v1/auth 경로를 포함해서 전달
         svc = service.value if isinstance(service, ServiceType) else str(service)
-        forward_path = f"/api/v1/{svc}/{path}"
+        # 서비스 prefix 제거하고 path만 전달 (서비스가 이미 자신의 prefix를 알고 있음)
+        forward_path = f"/api/v1/{path}"
         logger.info(f"🎯 최종 전달 경로(PATCH): {forward_path}")
 
         response = await service_discovery.request(

@@ -37,7 +37,7 @@ class AuthResponse(BaseModel):
     company_id: Optional[str] = Field(None, description="회사 ID")
 
 
-auth_router = APIRouter(prefix="/auth", tags=["Auth"])
+auth_router = APIRouter(prefix="/auth-service", tags=["Auth"])
 
 
 
