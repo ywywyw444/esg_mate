@@ -37,7 +37,7 @@ async def lifespan(app: FastAPI):
     logger.info("🚀 서비스 등록 중...")
     
     # Auth 서비스 등록 - 환경변수 사용
-    auth_service_url = os.getenv("AUTH_SERVICE_URL", "auth-service-production-f2ef.up.railway.app")
+    auth_service_url = os.getenv("AUTH_SERVICE_URL", "https://auth-service-production-f2ef.up.railway.app")
     logger.info(f"🔧 Auth 서비스 URL: {auth_service_url}")
     
     app.state.service_discovery.register_service(
@@ -225,9 +225,13 @@ async def proxy_post(
             status_code=he.status_code
         )
     except Exception as e:
-        logger.error(f"POST 요청 처리 중 오류 발생: {str(e)}")
+        logger.error(f"🚨 POST 요청 처리 중 오류 발생: {str(e)}")
+        logger.error(f"🚨 오류 타입: {type(e).__name__}")
+        logger.error(f"🚨 오류 상세: {str(e)}")
+        import traceback
+        logger.error(f"🚨 스택 트레이스: {traceback.format_exc()}")
         return JSONResponse(
-            content={"detail": f"Gateway error: {str(e)}"},
+            content={"detail": f"Gateway error: {str(e)}", "error_type": type(e).__name__},
             status_code=500
         )
 
