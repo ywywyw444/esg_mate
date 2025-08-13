@@ -50,17 +50,17 @@ export default function SignupPage() {
       
       // 직접 auth-service로 요청 (게이트웨이 우회)
       // const apiUrl = 'https://auth-service-production-f2ef.up.railway.app';
-      const apiUrl = 'https://gateway-production-1104.up.railway.app/api/v1/auth';
+      const apiUrl = 'https://gateway-production-1104.up.railway.app/api/v1/auth/signup';
       console.log(`😂 apiUrl: ${apiUrl}`);
       // https://gateway-production-1104.up.railway.app/api/v1/auth/signup
       // 비동기 요청 처리
-      const response = await axios.post(`${apiUrl}/signup`, formData);
+      const response = await axios.post(`${apiUrl}`, formData);
       console.log('Signup successful:', response.data);
       
       // 성공 메시지 표시
       if (response.data?.success) {
         alert(`✅ ${response.data.message}\n\n이메일: ${response.data.email}\n사용자 ID: ${response.data.user_id}`);
-        router.push('/login');
+        router.push('/');
       } else {
         // success 플래그가 없거나 false인 경우
         const msg = response.data?.message || '알 수 없는 응답 형식입니다.';
