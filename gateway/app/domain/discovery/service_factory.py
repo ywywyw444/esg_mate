@@ -14,7 +14,7 @@ SERVICE_URLS = {
     "materiality-service": os.getenv("MATERIALITY_SERVICE_URL", "https://materiality-service-production.up.railway.app"),
     "report-service": os.getenv("REPORT_SERVICE_URL", "https://report-service-production.up.railway.app"),
     "tcfd-service": os.getenv("TCFD_SERVICE_URL", "https://tcfd-service-production.up.railway.app"),
-    "user-service": os.getenv("USER_SERVICE_URL", "https://user-service-production.up.railway.app"),
+    "survey-service": os.getenv("SURVEY_SERVICE_URL", "https://survey-service-production.up.railway.app"),
 }
 
 class ServiceProxyFactory:
