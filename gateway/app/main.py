@@ -7,12 +7,11 @@ import logging
 import sys
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager
+import httpx
+import json
 
 from app.www.jwt_auth_middleware import AuthMiddleware
-from app.domain.discovery.service_discovery import ServiceDiscovery
-from app.domain.discovery.service_type import ServiceType
-
-from app.common.utility.factory.response_factory import ResponseFactory
+from app.domain.discovery.service_factory import SimpleServiceFactory
 
 # Gateway는 DB에 직접 접근하지 않음 (MSA 원칙)
 
@@ -28,42 +27,11 @@ logger = logging.getLogger("gateway_api")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("�� Gateway API 서비스 시작")
-
-    # 서비스 디스커버리 초기화 및 서비스 등록
-    app.state.service_discovery = ServiceDiscovery()
+    logger.info("🚀 Gateway API 서비스 시작")
     
-    # 프로덕션 환경에서 서비스 등록
-    logger.info("🚀 서비스 등록 중...")
-    
-    # Auth 서비스 등록 - 환경변수 사용
-    auth_service_url = os.getenv("AUTH_SERVICE_URL", "https://auth-service-production-f2ef.up.railway.app")
-    logger.info(f"🔧 Auth 서비스 URL: {auth_service_url}")
-    
-    # URL에서 host와 port 추출
-    from urllib.parse import urlparse
-    parsed_url = urlparse(auth_service_url)
-    host = parsed_url.hostname
-    port = parsed_url.port or (443 if parsed_url.scheme == 'https' else 80)
-    
-    logger.info(f"🔧 파싱된 host: {host}, port: {port}")
-    
-    app.state.service_discovery.register_service(
-        service_name="auth-service",
-        instances=[{"host": host, "port": port, "weight": 1}],
-        load_balancer_type="round_robin"
-    )
-    logger.info("✅ auth-service 서비스 등록 완료")
-    
-    # 등록된 서비스 확인
-    logger.info(f"🔍 등록된 서비스들: {list(app.state.service_discovery.registry.keys())}")
-    
-    # 서비스 등록 상태 확인
-    logger.info("🔍 서비스 등록 상태 확인:")
-    logger.info(f"🔍 ServiceType.AUTH = {ServiceType.AUTH}")
-    logger.info(f"🔍 ServiceType.AUTH.value = {ServiceType.AUTH.value}")
-    logger.info(f"🔍 ServiceType.AUTH == 'auth-service': {ServiceType.AUTH == 'auth-service'}")
-    logger.info(f"🔍 'auth-service' in ServiceType: {'auth-service' in [s.value for s in ServiceType]}")
+    # 서비스 팩토리 초기화
+    app.state.service_factory = SimpleServiceFactory()
+    logger.info("✅ Service Factory 초기화 완료")
     
     yield
     logger.info("🛑 Gateway API 서비스 종료")
@@ -96,7 +64,6 @@ app.add_middleware(
 )
 
 
-
 # 모든 요청 로깅 미들웨어 추가
 @app.middleware("http")
 async def log_all_requests(request: Request, call_next):
@@ -115,6 +82,7 @@ FORWARD_BASE_PATH = "api/v1"
 
 # 라우터 생성
 logger.info("🔧 Gateway 라우터 생성 시작...")
+
 gateway_router = APIRouter(tags=["Gateway API"], prefix="/api/v1")
 
 # 라우터 등록 확인 로그
@@ -128,29 +96,33 @@ FILE_REQUIRED_SERVICES = set()
 
 @gateway_router.get("/{service}/{path:path}", summary="GET 프록시")
 async def proxy_get(
-    service: ServiceType, 
+    service: str, 
     path: str, 
     request: Request
 ):
     logger.info("🚀 GET 프록시 함수 시작!")
     try:
-        service_discovery = request.app.state.service_discovery
+        service_factory = request.app.state.service_factory
         headers = dict(request.headers)
 
         # ===== [수정] 내부로 넘길 경로 재작성 =====
         # auth-service는 /api/v1/auth 경로를 포함해서 전달
-        svc = service.value if isinstance(service, ServiceType) else str(service)
-        # 서비스 prefix 제거하고 path만 전달 (서비스가 이미 자신의 prefix를 알고 있음)
         forward_path = f"/api/v1/{path}"
         logger.info(f"🎯 최종 전달 경로(GET): {forward_path}")
 
-        response = await service_discovery.request(
+        response = await service_factory.forward_request(
             method="GET",
-            service=service,
             path=forward_path,
             headers=headers
         )
-        return ResponseFactory.create_response(response)
+        
+        if response.get("error"):
+            return JSONResponse(
+                content={"detail": response.get("detail", "Unknown error")},
+                status_code=response.get("status_code", 500)
+            )
+        
+        return JSONResponse(content=response.get("data", {}), status_code=response.get("status_code", 200))
     except Exception as e:
         logger.error(f"Error in GET proxy: {str(e)}")
         return JSONResponse(
@@ -165,7 +137,7 @@ import json
 
 @gateway_router.post("/{service}/{path:path}", summary="POST 프록시 (JSON 전용)")
 async def proxy_post_json(
-    service: ServiceType,
+    service: str,
     path: str,
     request: Request,
     # ✅ JSON 전용 바디 선언 → Swagger에 JSON 에디터 표시
@@ -178,21 +150,7 @@ async def proxy_post_json(
     logger.info(f"🚀 요청 URL: {request.url}")
 
     try:
-        service_discovery = request.app.state.service_discovery
-        instance = service_discovery.get_service_instance(service)
-        if not instance:
-            logger.error(f"❌ 서비스 인스턴스를 찾을 수 없음: {service}")
-            return JSONResponse(
-                content={"detail": f"Service {service} not available"},
-                status_code=503
-            )
-
-        # ✅ 파일/폼 관련 요소 완전히 제거 (JSON 전용)
-        files = None
-        params = None
-        data = None
-
-        # ✅ JSON으로 전달할 준비
+        service_factory = request.app.state.service_factory
         headers = dict(request.headers)
         headers["content-type"] = "application/json"
         # Content-Length 헤더 제거 (자동 계산되도록)
@@ -201,25 +159,25 @@ async def proxy_post_json(
         body = json.dumps(payload)  # service_discovery.request가 raw body 받는다고 가정
 
         # 내부로 넘길 경로
-        svc = service.value if isinstance(service, ServiceType) else str(service)
-        # 서비스 prefix 제거하고 path만 전달 (서비스가 이미 자신의 prefix를 알고 있음)
         forward_path = f"/api/v1/{path}"
         logger.info(f"🎯 최종 전달 경로(POST, JSON): {forward_path}")
         logger.info(f"🔧 전달할 body 크기: {len(body) if body else 0} bytes")
         logger.info(f"🔧 전달할 headers: {headers}")
 
-        response = await service_discovery.request(
+        response = await service_factory.forward_request(
             method="POST",
-            service=service,
             path=forward_path,
             headers=headers,
-            body=body,     # ✅ JSON 문자열로 전달
-            files=files,
-            params=params,
-            data=data
+            body=body
         )
 
-        return ResponseFactory.create_response(response)
+        if response.get("error"):
+            return JSONResponse(
+                content={"detail": response.get("detail", "Unknown error")},
+                status_code=response.get("status_code", 500)
+            )
+        
+        return JSONResponse(content=response.get("data", {}), status_code=response.get("status_code", 200))
 
     except HTTPException as he:
         return JSONResponse(content={"detail": he.detail}, status_code=he.status_code)
@@ -329,26 +287,30 @@ async def proxy_post_json(
 #         )
 
 @gateway_router.put("/{service}/{path:path}", summary="PUT 프록시")
-async def proxy_put(service: ServiceType, path: str, request: Request):
+async def proxy_put(service: str, path: str, request: Request):
     try:
-        service_discovery = request.app.state.service_discovery
+        service_factory = request.app.state.service_factory
         headers = dict(request.headers)
 
         # ===== [수정] 내부로 넘길 경로 재작성 =====
         # auth-service는 /api/v1/auth 경로를 포함해서 전달
-        svc = service.value if isinstance(service, ServiceType) else str(service)
-        # 서비스 prefix 제거하고 path만 전달 (서비스가 이미 자신의 prefix를 알고 있음)
         forward_path = f"/api/v1/{path}"
         logger.info(f"🎯 최종 전달 경로(PUT): {forward_path}")
 
-        response = await service_discovery.request(
+        response = await service_factory.forward_request(
             method="PUT",
-            service=service,
             path=forward_path,
             headers=headers,
             body=await request.body()
         )
-        return ResponseFactory.create_response(response)
+        
+        if response.get("error"):
+            return JSONResponse(
+                content={"detail": response.get("detail", "Unknown error")},
+                status_code=response.get("status_code", 500)
+            )
+        
+        return JSONResponse(content=response.get("data", {}), status_code=response.get("status_code", 200))
     except Exception as e:
         logger.error(f"Error in PUT proxy: {str(e)}")
         return JSONResponse(
@@ -357,26 +319,30 @@ async def proxy_put(service: ServiceType, path: str, request: Request):
         )
 
 @gateway_router.delete("/{service}/{path:path}", summary="DELETE 프록시")
-async def proxy_delete(service: ServiceType, path: str, request: Request):
+async def proxy_delete(service: str, path: str, request: Request):
     try:
-        service_discovery = request.app.state.service_discovery
+        service_factory = request.app.state.service_factory
         headers = dict(request.headers)
 
         # ===== [수정] 내부로 넘길 경로 재작성 =====
         # auth-service는 /api/v1/auth 경로를 포함해서 전달
-        svc = service.value if isinstance(service, ServiceType) else str(service)
-        # 서비스 prefix 제거하고 path만 전달 (서비스가 이미 자신의 prefix를 알고 있음)
         forward_path = f"/api/v1/{path}"
         logger.info(f"🎯 최종 전달 경로(DELETE): {forward_path}")
 
-        response = await service_discovery.request(
+        response = await service_factory.forward_request(
             method="DELETE",
-            service=service,
             path=forward_path,
             headers=headers,
             body=await request.body()
         )
-        return ResponseFactory.create_response(response)
+        
+        if response.get("error"):
+            return JSONResponse(
+                content={"detail": response.get("detail", "Unknown error")},
+                status_code=response.get("status_code", 500)
+            )
+        
+        return JSONResponse(content=response.get("data", {}), status_code=response.get("status_code", 200))
     except Exception as e:
         logger.error(f"Error in DELETE proxy: {str(e)}")
         return JSONResponse(
@@ -385,26 +351,30 @@ async def proxy_delete(service: ServiceType, path: str, request: Request):
         )
 
 @gateway_router.patch("/{service}/{path:path}", summary="PATCH 프록시")
-async def proxy_patch(service: ServiceType, path: str, request: Request):
+async def proxy_patch(service: str, path: str, request: Request):
     try:
-        service_discovery = request.app.state.service_discovery
+        service_factory = request.app.state.service_factory
         headers = dict(request.headers)
 
         # ===== [수정] 내부로 넘길 경로 재작성 =====
         # auth-service는 /api/v1/auth 경로를 포함해서 전달
-        svc = service.value if isinstance(service, ServiceType) else str(service)
-        # 서비스 prefix 제거하고 path만 전달 (서비스가 이미 자신의 prefix를 알고 있음)
         forward_path = f"/api/v1/{path}"
         logger.info(f"🎯 최종 전달 경로(PATCH): {forward_path}")
 
-        response = await service_discovery.request(
+        response = await service_factory.forward_request(
             method="PATCH",
-            service=service,
             path=forward_path,
             headers=headers,
             body=await request.body()
         )
-        return ResponseFactory.create_response(response)
+        
+        if response.get("error"):
+            return JSONResponse(
+                content={"detail": response.get("detail", "Unknown error")},
+                status_code=response.get("status_code", 500)
+            )
+        
+        return JSONResponse(content=response.get("data", {}), status_code=response.get("status_code", 200))
     except Exception as e:
         logger.error(f"Error in PATCH proxy: {str(e)}")
         return JSONResponse(
@@ -456,14 +426,13 @@ async def not_found_handler(request: Request, exc):
     if len(path_parts) >= 5:
         logger.error(f"🎯 추출된 service: {path_parts[3]}")
         logger.error(f"🚨 추출된 path: {path_parts[4:]}")
-        logger.error(f"🚨 service 매칭 여부: {path_parts[3] in [s.value for s in ServiceType]}")
     
     logger.error(f"🚨 등록된 라우트들:")
     for route in app.routes:
         if hasattr(route, 'path'):
             logger.error(f"  - {route.methods} {route.path}")
     
-    logger.error(f" gateway_router 라우트들:")
+    logger.error(f"🚨 gateway_router 라우트들:")
     for route in gateway_router.routes:
         if hasattr(route, 'path'):
             logger.error(f"  - {route.methods} {route.path}")
