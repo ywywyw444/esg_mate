@@ -106,8 +106,8 @@ async def proxy_get(
         headers = dict(request.headers)
 
         # ===== [수정] 내부로 넘길 경로 재작성 =====
-        # auth-service는 /api/v1/auth 경로를 포함해서 전달
-        forward_path = f"/api/v1/{path}"
+        # auth-service는 /auth-service 경로를 포함해서 전달
+        forward_path = f"/auth-service/{path}"
         logger.info(f"🎯 최종 전달 경로(GET): {forward_path}")
 
         response = await service_factory.forward_request(
@@ -159,7 +159,7 @@ async def proxy_post_json(
         body = json.dumps(payload)  # service_discovery.request가 raw body 받는다고 가정
 
         # 내부로 넘길 경로
-        forward_path = f"/api/v1/{path}"
+        forward_path = f"/auth-service/{path}"
         logger.info(f"🎯 최종 전달 경로(POST, JSON): {forward_path}")
         logger.info(f"🔧 전달할 body 크기: {len(body) if body else 0} bytes")
         logger.info(f"🔧 전달할 headers: {headers}")
@@ -293,8 +293,8 @@ async def proxy_put(service: str, path: str, request: Request):
         headers = dict(request.headers)
 
         # ===== [수정] 내부로 넘길 경로 재작성 =====
-        # auth-service는 /api/v1/auth 경로를 포함해서 전달
-        forward_path = f"/api/v1/{path}"
+        # auth-service는 /auth-service 경로를 포함해서 전달
+        forward_path = f"/auth-service/{path}"
         logger.info(f"🎯 최종 전달 경로(PUT): {forward_path}")
 
         response = await service_factory.forward_request(
@@ -325,8 +325,8 @@ async def proxy_delete(service: str, path: str, request: Request):
         headers = dict(request.headers)
 
         # ===== [수정] 내부로 넘길 경로 재작성 =====
-        # auth-service는 /api/v1/auth 경로를 포함해서 전달
-        forward_path = f"/api/v1/{path}"
+        # auth-service는 /auth-service 경로를 포함해서 전달
+        forward_path = f"/auth-service/{path}"
         logger.info(f"🎯 최종 전달 경로(DELETE): {forward_path}")
 
         response = await service_factory.forward_request(
@@ -357,8 +357,8 @@ async def proxy_patch(service: str, path: str, request: Request):
         headers = dict(request.headers)
 
         # ===== [수정] 내부로 넘길 경로 재작성 =====
-        # auth-service는 /api/v1/auth 경로를 포함해서 전달
-        forward_path = f"/api/v1/{path}"
+        # auth-service는 /auth-service 경로를 포함해서 전달
+        forward_path = f"/auth-service/{path}"
         logger.info(f"🎯 최종 전달 경로(PATCH): {forward_path}")
 
         response = await service_factory.forward_request(
