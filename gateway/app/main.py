@@ -11,7 +11,7 @@ from contextlib import asynccontextmanager
 from app.www.jwt_auth_middleware import AuthMiddleware
 from app.domain.discovery.service_discovery import ServiceDiscovery
 from app.domain.discovery.service_type import ServiceType
-from app.common.utility.constant.settings import Settings
+
 from app.common.utility.factory.response_factory import ResponseFactory
 
 # Gateway는 DB에 직접 접근하지 않음 (MSA 원칙)
@@ -30,9 +30,6 @@ logger = logging.getLogger("gateway_api")
 async def lifespan(app: FastAPI):
     logger.info("�� Gateway API 서비스 시작")
 
-    # Settings 초기화 및 앱 state에 등록
-    app.state.settings = Settings()
-    
     # 서비스 디스커버리 초기화 및 서비스 등록
     app.state.service_discovery = ServiceDiscovery()
     

@@ -16,11 +16,11 @@ class Settings(BaseSettings):
     REQUEST_TIMEOUT: int = 30
     HEALTH_CHECK_INTERVAL: int = 30
     
-    # CORS 설정
-    CORS_ORIGINS: List[str] = ["*"]  # 모든 origin 허용
+    # CORS 설정 - 단순 문자열로 변경
+    CORS_ORIGINS: str = "*"  # 모든 origin 허용
     CORS_ALLOW_CREDENTIALS: bool = True
-    CORS_ALLOW_METHODS: List[str] = ["*"]
-    CORS_ALLOW_HEADERS: List[str] = ["*"]
+    CORS_ALLOW_METHODS: str = "*"
+    CORS_ALLOW_HEADERS: str = "*"
     
     class Config:
         env_file = ".env"
