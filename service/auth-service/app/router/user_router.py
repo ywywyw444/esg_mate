@@ -47,6 +47,7 @@ async def login_process(request: Request):
     try:
         form_data = await request.json()
         logger.info(f"로그인 시도: {form_data.get('auth_id', 'N/A')}")
+        logger.info(f"로그인 시도: {form_data.get('auth_pw', 'N/A')}")
 
         required_fields = ['auth_id', 'auth_pw']
         missing_fields = [f for f in required_fields if not form_data.get(f)]
@@ -54,8 +55,46 @@ async def login_process(request: Request):
             logger.warning(f"필수 필드 누락: {missing_fields}")
             return {"success": False, "message": f"필수 필드가 누락되었습니다: {', '.join(missing_fields)}"}
 
-        # TODO: 서비스 연결 후 구현
-        return {"success": True, "message": "로그인 기능은 준비 중입니다."}
+        # 테스트용 하드코딩된 사용자 정보
+        test_users = {
+            "admin": {
+                "password": "admin123",
+                "name": "관리자",
+                "email": "admin@example.com",
+                "company_id": "COMP001",
+                "user_id": "user_001"
+            },
+            "test": {
+                "password": "test123",
+                "name": "테스트 사용자",
+                "email": "test@example.com",
+                "company_id": "COMP002",
+                "user_id": "user_002"
+            }
+        }
+
+        auth_id = form_data.get('auth_id')
+        auth_pw = form_data.get('auth_pw')
+
+        # 사용자 인증 확인
+        if auth_id in test_users and test_users[auth_id]['password'] == auth_pw:
+            user_info = test_users[auth_id]
+            logger.info(f"✅ 로그인 성공: {auth_id}")
+            
+            return {
+                "success": True,
+                "message": "로그인 성공!",
+                "user_id": user_info['user_id'],
+                "name": user_info['name'],
+                "email": user_info['email'],
+                "company_id": user_info['company_id']
+            }
+        else:
+            logger.warning(f"❌ 로그인 실패: 잘못된 인증 정보 - {auth_id}")
+            return {
+                "success": False,
+                "message": "아이디 또는 비밀번호가 올바르지 않습니다."
+            }
 
     except Exception as e:
         logger.error(f"로그인 처리 중 오류: {str(e)}")

@@ -83,6 +83,27 @@ class SimpleServiceFactory:
             url = f"{self.auth_service_url}{path}"
             logger.info(f"🎯 Auth Service로 전달: {method} {url}")
             
+            # 로그인/회원가입 요청 상세 로깅
+            if body and ("login" in path or "signup" in path):
+                try:
+                    import json
+                    body_data = json.loads(body)
+                    logger.info(f"🔐 요청 데이터 상세:")
+                    logger.info(f"   - 경로: {path}")
+                    logger.info(f"   - 메서드: {method}")
+                    if "auth_id" in body_data:
+                        logger.info(f"   - 사용자 ID: {body_data.get('auth_id', 'N/A')}")
+                    if "email" in body_data:
+                        logger.info(f"   - 이메일: {body_data.get('email', 'N/A')}")
+                    if "name" in body_data:
+                        logger.info(f"   - 이름: {body_data.get('name', 'N/A')}")
+                    if "company_id" in body_data:
+                        logger.info(f"   - 회사 ID: {body_data.get('company_id', 'N/A')}")
+                    logger.info(f"   - 전체 데이터: {body_data}")
+                except Exception as e:
+                    logger.warning(f"⚠️ 요청 데이터 파싱 실패: {str(e)}")
+                    logger.info(f"   - 원본 데이터: {body}")
+            
             # 헤더 준비
             request_headers = headers or {}
             if "host" in request_headers:
@@ -105,16 +126,23 @@ class SimpleServiceFactory:
                 
                 logger.info(f"✅ Auth Service 응답: {response.status_code}")
                 
+                # 응답 데이터도 로깅
                 if response.status_code < 400:
                     try:
-                        return {"status_code": response.status_code, "data": response.json()}
+                        response_data = response.json()
+                        logger.info(f"📤 응답 데이터: {response_data}")
+                        return {"status_code": response.status_code, "data": response_data}
                     except Exception:
-                        return {"status_code": response.status_code, "data": response.text}
+                        response_text = response.text
+                        logger.info(f"📤 응답 텍스트: {response_text}")
+                        return {"status_code": response.status_code, "data": response_text}
                 else:
+                    error_detail = response.text
+                    logger.error(f"❌ Auth Service 오류 응답: {response.status_code} - {error_detail}")
                     return {
                         "error": True,
                         "status_code": response.status_code,
-                        "detail": response.text
+                        "detail": error_detail
                     }
                     
         except Exception as e:
