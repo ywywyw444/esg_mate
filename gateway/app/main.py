@@ -129,8 +129,8 @@ async def proxy_get(
         headers = dict(request.headers)
 
         # ===== [수정] 내부로 넘길 경로 재작성 =====
-        # auth-service는 /signup만 처리하므로 path만 전달
-        forward_path = path
+        # auth-service는 /api/v1/auth 경로를 포함해서 전달
+        forward_path = f"/api/v1/{service}/{path}"
         logger.info(f"🎯 최종 전달 경로(GET): {forward_path}")
 
         response = await service_discovery.request(
@@ -147,8 +147,77 @@ async def proxy_get(
             status_code=500
         )
 
+from typing import Any, Dict, Optional
+from fastapi import Body, HTTPException, JSONResponse, Request
+import json
+import logging
+
+logger = logging.getLogger(__name__)
+
+@gateway_router.post("/{service}/{path:path}:json", summary="POST 프록시 (JSON 전용)")
+async def proxy_post_json(
+    service: ServiceType,
+    path: str,
+    request: Request,
+    # ✅ JSON 전용 바디 선언 → Swagger에 JSON 에디터 표시
+    payload: Dict[str, Any] = Body(
+        ...,  # required
+        example={"email": "test@example.com", "password": "****"}
+    ),
+):
+    logger.info(f"🚀 POST 프록시(JSON) 시작: service={service}, path={path}")
+    logger.info(f"🚀 요청 URL: {request.url}")
+
+    try:
+        service_discovery = request.app.state.service_discovery
+        instance = service_discovery.get_service_instance(service)
+        if not instance:
+            logger.error(f"❌ 서비스 인스턴스를 찾을 수 없음: {service}")
+            return JSONResponse(
+                content={"detail": f"Service {service} not available"},
+                status_code=503
+            )
+
+        # ✅ 파일/폼 관련 요소 완전히 제거 (JSON 전용)
+        files = None
+        params = None
+        data = None
+
+        # ✅ JSON으로 전달할 준비
+        headers = dict(request.headers)
+        headers["content-type"] = "application/json"
+        body = json.dumps(payload)  # service_discovery.request가 raw body 받는다고 가정
+
+        # 내부로 넘길 경로
+        forward_path = f"/api/v1/{service}/{path}"
+        logger.info(f"🎯 최종 전달 경로(POST, JSON): {forward_path}")
+
+        response = await service_discovery.request(
+            method="POST",
+            service=service,
+            path=forward_path,
+            headers=headers,
+            body=body,     # ✅ JSON 문자열로 전달
+            files=files,
+            params=params,
+            data=data
+        )
+
+        return ResponseFactory.create_response(response)
+
+    except HTTPException as he:
+        return JSONResponse(content={"detail": he.detail}, status_code=he.status_code)
+    except Exception as e:
+        logger.error(f"🚨 POST(JSON) 처리 중 오류: {e}", exc_info=True)
+        return JSONResponse(
+            content={"detail": f"Gateway error: {str(e)}", "error_type": type(e).__name__},
+            status_code=500
+        )
+
+
+
 # 파일 업로드 및 일반 JSON 요청 모두 처리, JWT 적용
-@gateway_router.post("/{service}/{path:path}", summary="POST 프록시")
+@gateway_router.post("/{service}/{path:path}:multipart", summary="POST 프록시")
 async def proxy_post(
     service: ServiceType, 
     path: str,
@@ -210,8 +279,8 @@ async def proxy_post(
                 logger.warning(f"요청 본문 읽기 실패: {str(e)}")
 
         # ===== [수정] 내부로 넘길 경로 재작성 =====
-        # auth-service는 /signup만 처리하므로 path만 전달
-        forward_path = path
+        # auth-service는 /api/v1/auth 경로를 포함해서 전달
+        forward_path = f"/api/v1/{service}/{path}"
         logger.info(f"🎯 최종 전달 경로(POST): {forward_path}")
 
         response = await service_discovery.request(
@@ -250,8 +319,8 @@ async def proxy_put(service: ServiceType, path: str, request: Request):
         headers = dict(request.headers)
 
         # ===== [수정] 내부로 넘길 경로 재작성 =====
-        # auth-service는 /signup만 처리하므로 path만 전달
-        forward_path = path
+        # auth-service는 /api/v1/auth 경로를 포함해서 전달
+        forward_path = f"/api/v1/{service}/{path}"
         logger.info(f"🎯 최종 전달 경로(PUT): {forward_path}")
 
         response = await service_discovery.request(
@@ -276,8 +345,8 @@ async def proxy_delete(service: ServiceType, path: str, request: Request):
         headers = dict(request.headers)
 
         # ===== [수정] 내부로 넘길 경로 재작성 =====
-        # auth-service는 /signup만 처리하므로 path만 전달
-        forward_path = path
+        # auth-service는 /api/v1/auth 경로를 포함해서 전달
+        forward_path = f"/api/v1/{service}/{path}"
         logger.info(f"🎯 최종 전달 경로(DELETE): {forward_path}")
 
         response = await service_discovery.request(
@@ -303,7 +372,7 @@ async def proxy_patch(service: ServiceType, path: str, request: Request):
 
         # ===== [수정] 내부로 넘길 경로 재작성 =====
         # auth-service는 /signup만 처리하므로 path만 전달
-        forward_path = path
+        forward_path = f"/api/v1/{service}/{path}"
         logger.info(f"�� 최종 전달 경로(PATCH): {forward_path}")
 
         response = await service_discovery.request(
