@@ -184,11 +184,16 @@ async def proxy_post_json(
         # ✅ JSON으로 전달할 준비
         headers = dict(request.headers)
         headers["content-type"] = "application/json"
+        # Content-Length 헤더 제거 (자동 계산되도록)
+        if "content-length" in headers:
+            del headers["content-length"]
         body = json.dumps(payload)  # service_discovery.request가 raw body 받는다고 가정
 
         # 내부로 넘길 경로
         forward_path = f"/api/v1/{service}/{path}"
         logger.info(f"🎯 최종 전달 경로(POST, JSON): {forward_path}")
+        logger.info(f"🔧 전달할 body 크기: {len(body) if body else 0} bytes")
+        logger.info(f"🔧 전달할 headers: {headers}")
 
         response = await service_discovery.request(
             method="POST",
