@@ -462,7 +462,7 @@ async def root():
 
 @app.get("/health")
 async def health_check_root():
-    return {"status": "healthy", "service": "gateway", "path": "root"}
+    logger.info("🔍😁😁😁😁😁": "healthy", "service": "gateway", "path": "root")
 
 @app.get("/health/db")
 async def health_check_db():
