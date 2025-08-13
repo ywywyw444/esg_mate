@@ -50,7 +50,7 @@ export default function SignupPage() {
       
       // 직접 auth-service로 요청 (게이트웨이 우회)
       // const apiUrl = 'https://auth-service-production-f2ef.up.railway.app';
-      const apiUrl = 'https://gateway-production-1104.up.railway.app/api/v1/auth/signup';
+      const apiUrl = 'https://gateway-production-1104.up.railway.app/api/v1/auth-service/signup';
       console.log(`😂 apiUrl: ${apiUrl}`);
       // https://gateway-production-1104.up.railway.app/api/v1/auth/signup
       // 비동기 요청 처리

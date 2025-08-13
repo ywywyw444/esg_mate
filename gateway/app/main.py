@@ -49,11 +49,11 @@ async def lifespan(app: FastAPI):
     logger.info(f"🔧 파싱된 host: {host}, port: {port}")
     
     app.state.service_discovery.register_service(
-        service_name="auth",
+        service_name="auth-service",
         instances=[{"host": host, "port": port, "weight": 1}],
         load_balancer_type="round_robin"
     )
-    logger.info("✅ auth 서비스 등록 완료")
+    logger.info("✅ auth-service 서비스 등록 완료")
     
     # 등록된 서비스 확인
     logger.info(f"🔍 등록된 서비스들: {list(app.state.service_discovery.registry.keys())}")

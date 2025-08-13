@@ -43,7 +43,7 @@ export default function LoginPage() {
     try {
       // Gateway를 통한 로그인 요청
       const apiUrl = 'https://gateway-production-1104.up.railway.app';
-      const response = await axios.post(`${apiUrl}/api/v1/auth/login`, formData);
+      const response = await axios.post(`${apiUrl}/api/v1/auth-service/login`, formData);
       
       console.log('Login response:', response.data);
       
