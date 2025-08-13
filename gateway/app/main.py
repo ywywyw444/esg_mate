@@ -36,10 +36,13 @@ async def lifespan(app: FastAPI):
     # 프로덕션 환경에서 서비스 등록
     logger.info("🚀 서비스 등록 중...")
     
-    # Auth 서비스 등록
+    # Auth 서비스 등록 - 환경변수 사용
+    auth_service_url = os.getenv("AUTH_SERVICE_URL", "auth-service-production-f2ef.up.railway.app")
+    logger.info(f"🔧 Auth 서비스 URL: {auth_service_url}")
+    
     app.state.service_discovery.register_service(
         service_name="auth",
-        instances=[{"host": "auth-service-production-f2ef.up.railway.app", "port": 443, "weight": 1}],
+        instances=[{"host": auth_service_url, "port": 443, "weight": 1}],
         load_balancer_type="round_robin"
     )
     logger.info("✅ auth 서비스 등록 완료")
