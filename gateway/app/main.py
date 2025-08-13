@@ -59,12 +59,12 @@ async def lifespan(app: FastAPI):
         logger.info("🚀 Railway 프로덕션 환경에서 서비스 등록 중...")
         
         # Railway 프로덕션 환경
-        app.state.service_discovery.register_service(
-            service_name="chatbot",
-            instances=[{"host": "chatbot-service-production-1deb.up.railway.app", "port": 443, "weight": 1}],
-            load_balancer_type="round_robin"
-        )
-        logger.info("✅ chatbot 등록 완료")
+        # app.state.service_discovery.register_service(
+        #     service_name="chatbot",
+        #     instances=[{"host": "chatbot-service-production-1deb.up.railway.app", "port": 443, "weight": 1}],
+        #     load_balancer_type="round_robin"
+        # )
+        # logger.info("✅ chatbot 등록 완료")
         
         app.state.service_discovery.register_service(
             service_name="auth",
