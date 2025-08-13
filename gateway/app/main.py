@@ -58,6 +58,13 @@ async def lifespan(app: FastAPI):
     # 등록된 서비스 확인
     logger.info(f"🔍 등록된 서비스들: {list(app.state.service_discovery.registry.keys())}")
     
+    # 서비스 등록 상태 확인
+    logger.info("🔍 서비스 등록 상태 확인:")
+    logger.info(f"🔍 ServiceType.AUTH = {ServiceType.AUTH}")
+    logger.info(f"🔍 ServiceType.AUTH.value = {ServiceType.AUTH.value}")
+    logger.info(f"🔍 ServiceType.AUTH == 'auth-service': {ServiceType.AUTH == 'auth-service'}")
+    logger.info(f"🔍 'auth-service' in ServiceType: {'auth-service' in [s.value for s in ServiceType]}")
+    
     yield
     logger.info("🛑 Gateway API 서비스 종료")
 
@@ -399,12 +406,12 @@ async def proxy_patch(service: ServiceType, path: str, request: Request):
         )
 
 # 라우터 등록 (모든 엔드포인트 정의 후)
-logger.info("�� 라우터 등록 중...")
+logger.info("🔧 라우터 등록 중...")
 app.include_router(gateway_router)
 logger.info("✅ Gateway 라우터 등록 완료")
 
 # 라우트 등록 확인 (모든 라우트 함수 정의 후)
-logger.info("�� 등록된 라우트들:")
+logger.info("🔍 등록된 라우트들:")
 post_routes_found = 0
 for route in app.routes:
     if hasattr(route, 'path'):
@@ -412,7 +419,7 @@ for route in app.routes:
         if 'POST' in route.methods and '{service}' in route.path:
             post_routes_found += 1
             logger.info(f"🎯 POST 동적 라우트 발견: {route.path}")
-            logger.info(f"�� 라우트 함수: {route.endpoint.__name__ if hasattr(route, 'endpoint') else 'Unknown'}")
+            logger.info(f"🎯 라우트 함수: {route.endpoint.__name__ if hasattr(route, 'endpoint') else 'Unknown'}")
             logger.info(f"🎯 라우트 엔드포인트: {route.endpoint}")
 
 logger.info(f"🎯 총 POST 동적 라우트 개수: {post_routes_found}")
@@ -422,11 +429,8 @@ for route in gateway_router.routes:
     if hasattr(route, 'path'):
         logger.info(f"  - {route.methods} {route.path}")
 
-logger.info("🔍 서비스 등록 상태 확인:")
-logger.info(f"🔍 등록된 서비스들: {list(app.state.service_discovery.registry.keys())}")
-
 logger.info("🎯 라우트 매칭 테스트:")
-test_path = "/api/v1/auth/signup"
+test_path = "/api/v1/auth-service/signup"
 logger.info(f"🎯 테스트 경로: {test_path}")
 logger.info(f"🎯 경로에서 service 추출: {test_path.split('/')[3] if len(test_path.split('/')) > 3 else 'N/A'}")
 logger.info(f"🔍 경로에서 path 추출: {test_path.split('/')[4:] if len(test_path.split('/')) > 4 else 'N/A'}")
