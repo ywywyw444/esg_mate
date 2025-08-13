@@ -36,68 +36,22 @@ async def lifespan(app: FastAPI):
     # 서비스 디스커버리 초기화 및 서비스 등록
     app.state.service_discovery = ServiceDiscovery()
     
-    # Railway 환경 감지 (여러 방법으로 확인)
-    railway_env = os.getenv("RAILWAY_ENVIRONMENT")
-    railway_service_name = os.getenv("RAILWAY_SERVICE_NAME")
-    railway_project_id = os.getenv("RAILWAY_PROJECT_ID")
-    port = os.getenv("PORT", "8080")
+    # 프로덕션 환경에서 서비스 등록
+    logger.info("🚀 서비스 등록 중...")
     
-    logger.info(f"🔍 환경변수 확인: RAILWAY_ENVIRONMENT={railway_env}")
-    logger.info(f"�� 환경변수 확인: RAILWAY_SERVICE_NAME={railway_service_name}")
-    logger.info(f"🔍 환경변수 확인: RAILWAY_PROJECT_ID={railway_project_id}")
-    logger.info(f"🔍 환경변수 확인: PORT={port}")
+    # Auth 서비스 등록
+    app.state.service_discovery.register_service(
+        service_name="auth",
+        instances=[{"host": "auth-service-production-f2ef.up.railway.app", "port": 443, "weight": 1}],
+        load_balancer_type="round_robin"
+    )
+    logger.info("✅ auth 서비스 등록 완료")
     
-    # Railway 환경에서는 실제 서비스 URL 사용 (PORT가 8080이 아닌 경우도 포함)
-    is_railway = (railway_env == "true" or 
-                  railway_service_name or 
-                  railway_project_id or 
-                  port != "8080")
-    
-    logger.info(f"🔍 Railway 환경 감지 결과: {is_railway}")
-    
-    if is_railway:
-        logger.info("🚀 Railway 프로덕션 환경에서 서비스 등록 중...")
-        
-        # Railway 프로덕션 환경
-        # app.state.service_discovery.register_service(
-        #     service_name="chatbot",
-        #     instances=[{"host": "chatbot-service-production-1deb.up.railway.app", "port": 443, "weight": 1}],
-        #     load_balancer_type="round_robin"
-        # )
-        # logger.info("✅ chatbot 등록 완료")
-        
-        app.state.service_discovery.register_service(
-            service_name="auth",
-            instances=[{"host": "auth-service-production-f2ef.up.railway.app", "port": 443, "weight": 1}],
-            load_balancer_type="round_robin"
-        )
-        logger.info("✅ auth 등록 완료")
-        
-        # 등록된 서비스 확인
-        logger.info(f"🔍 등록된 서비스들: {list(app.state.service_discovery.registry.keys())}")
-    else:
-        logger.info("🚀 로컬 개발 환경에서 서비스 등록 중...")
-        
-        # 로컬 개발 환경
-        app.state.service_discovery.register_service(
-            service_name="chatbot",
-            instances=[{"host": "chatbot-service", "port": 8006, "weight": 1}],
-            load_balancer_type="round_robin"
-        )
-        logger.info("✅ chatbot 등록 완료")
-        
-        app.state.service_discovery.register_service(
-            service_name="auth",
-            instances=[{"host": "auth-service", "port": 8008, "weight": 1}],
-            load_balancer_type="round_robin"
-        )
-        logger.info("✅ auth 등록 완료")
-        
-        # 등록된 서비스 확인
-        logger.info(f"🔍 등록된 서비스들: {list(app.state.service_discovery.registry.keys())}")
+    # 등록된 서비스 확인
+    logger.info(f"🔍 등록된 서비스들: {list(app.state.service_discovery.registry.keys())}")
     
     yield
-    logger.info("�� Gateway API 서비스 종료")
+    logger.info("🛑 Gateway API 서비스 종료")
 
 app = FastAPI(
     title="Gateway API",
