@@ -148,13 +148,11 @@ async def proxy_get(
         )
 
 from typing import Any, Dict, Optional
-from fastapi import Body, HTTPException, JSONResponse, Request
+from fastapi import Body, HTTPException, Request
+from fastapi.responses import JSONResponse
 import json
-import logging
 
-logger = logging.getLogger(__name__)
-
-@gateway_router.post("/{service}/{path:path}:json", summary="POST 프록시 (JSON 전용)")
+@gateway_router.post("/{service}/{path:path}", summary="POST 프록시 (JSON 전용)")
 async def proxy_post_json(
     service: ServiceType,
     path: str,
@@ -217,100 +215,100 @@ async def proxy_post_json(
 
 
 # 파일 업로드 및 일반 JSON 요청 모두 처리, JWT 적용
-@gateway_router.post("/{service}/{path:path}:multipart", summary="POST 프록시")
-async def proxy_post(
-    service: ServiceType, 
-    path: str,
-    request: Request,
-    file: Optional[UploadFile] = None,
-    sheet_names: Optional[List[str]] = Query(None, alias="sheet_name")
-):
-    logger.info(f"🚀 POST 프록시 함수 시작! service={service}, path={path}")
-    logger.info("�� POST 프록시 함수 시작!")
-    logger.info(f"🚀 요청 URL: {request.url}")
-    logger.info(f"🚀 요청 메서드: {request.method}")
-    logger.info(f"🚀 요청 경로: {request.url.path}")
-    logger.info(f"�� 서비스 파라미터: {service}")
-    logger.info(f"�� 경로 파라미터: {path}")
-    try:
-        logger.info(f"🔍 Gateway POST 요청: service={service}, path={path}")
-        logger.info(f"📤 요청 URL: /{service}/{path}")
+# @gateway_router.post("/{service}/{path:path}", summary="POST 프록시(multipart)")
+# async def proxy_post(
+#     service: ServiceType, 
+#     path: str,
+#     request: Request,
+#     file: Optional[UploadFile] = None,
+#     sheet_names: Optional[List[str]] = Query(None, alias="sheet_name")
+# ):
+#     logger.info(f"🚀 POST 프록시 함수 시작! service={service}, path={path}")
+#     logger.info("�� POST 프록시 함수 시작!")
+#     logger.info(f"🚀 요청 URL: {request.url}")
+#     logger.info(f"🚀 요청 메서드: {request.method}")
+#     logger.info(f"🚀 요청 경로: {request.url.path}")
+#     logger.info(f"�� 서비스 파라미터: {service}")
+#     logger.info(f"�� 경로 파라미터: {path}")
+#     try:
+#         logger.info(f"🔍 Gateway POST 요청: service={service}, path={path}")
+#         logger.info(f"📤 요청 URL: /{service}/{path}")
         
-        service_discovery = request.app.state.service_discovery
+#         service_discovery = request.app.state.service_discovery
         
-        instance = service_discovery.get_service_instance(service)
-        if instance:
-            logger.info(f"✅ 서비스 인스턴스 찾음: {instance.host}:{instance.port}")
-        else:
-            logger.error(f"❌ 서비스 인스턴스를 찾을 수 없음: {service}")
-            logger.error(f"🔍 등록된 서비스들: {list(service_discovery.registry.keys())}")
-            logger.error(f"🔍 요청된 서비스: {service}")
-            logger.error(f"🔍 서비스 타입: {type(service)}")
-            return JSONResponse(
-                content={"detail": f"Service {service} not available"},
-                status_code=503
-            )
+#         instance = service_discovery.get_service_instance(service)
+#         if instance:
+#             logger.info(f"✅ 서비스 인스턴스 찾음: {instance.host}:{instance.port}")
+#         else:
+#             logger.error(f"❌ 서비스 인스턴스를 찾을 수 없음: {service}")
+#             logger.error(f"🔍 등록된 서비스들: {list(service_discovery.registry.keys())}")
+#             logger.error(f"🔍 요청된 서비스: {service}")
+#             logger.error(f"🔍 서비스 타입: {type(service)}")
+#             return JSONResponse(
+#                 content={"detail": f"Service {service} not available"},
+#                 status_code=503
+#             )
 
-        if file:
-            logger.info(f"파일명: {file.filename}, 시트 이름: {sheet_names if sheet_names else '없음'}")
+#         if file:
+#             logger.info(f"파일명: {file.filename}, 시트 이름: {sheet_names if sheet_names else '없음'}")
 
-        files = None
-        params = None
-        body = None
-        data = None
+#         files = None
+#         params = None
+#         body = None
+#         data = None
         
-        headers = dict(request.headers)
+#         headers = dict(request.headers)
         
-        if service in FILE_REQUIRED_SERVICES:
-            if "upload" in path and not file:
-                raise HTTPException(status_code=400, detail=f"서비스 {service}에는 파일 업로드가 필요합니다.")
-            if file:
-                file_content = await file.read()
-                files = {'file': (file.filename, file_content, file.content_type)}
-                await file.seek(0)
-            if sheet_names:
-                params = {'sheet_name': sheet_names}
-        else:
-            try:
-                body = await request.body()
-                if not body:
-                    logger.info("요청 본문이 비어 있습니다.")
-            except Exception as e:
-                logger.warning(f"요청 본문 읽기 실패: {str(e)}")
+#         if service in FILE_REQUIRED_SERVICES:
+#             if "upload" in path and not file:
+#                 raise HTTPException(status_code=400, detail=f"서비스 {service}에는 파일 업로드가 필요합니다.")
+#             if file:
+#                 file_content = await file.read()
+#                 files = {'file': (file.filename, file_content, file.content_type)}
+#                 await file.seek(0)
+#             if sheet_names:
+#                 params = {'sheet_name': sheet_names}
+#         else:
+#             try:
+#                 body = await request.body()
+#                 if not body:
+#                     logger.info("요청 본문이 비어 있습니다.")
+#             except Exception as e:
+#                 logger.warning(f"요청 본문 읽기 실패: {str(e)}")
 
-        # ===== [수정] 내부로 넘길 경로 재작성 =====
-        # auth-service는 /api/v1/auth 경로를 포함해서 전달
-        forward_path = f"/api/v1/{service}/{path}"
-        logger.info(f"🎯 최종 전달 경로(POST): {forward_path}")
+#         # ===== [수정] 내부로 넘길 경로 재작성 =====
+#         # auth-service는 /api/v1/auth 경로를 포함해서 전달
+#         forward_path = f"/api/v1/{service}/{path}"
+#         logger.info(f"🎯 최종 전달 경로(POST): {forward_path}")
 
-        response = await service_discovery.request(
-            method="POST",
-            service=service,
-            path=forward_path,
-            headers=headers,
-            body=body,
-            files=files,
-            params=params,
-            data=data
-        )
+#         response = await service_discovery.request(
+#             method="POST",
+#             service=service,
+#             path=forward_path,
+#             headers=headers,
+#             body=body,
+#             files=files,
+#             params=params,
+#             data=data
+#         )
         
-        return ResponseFactory.create_response(response)
+#         return ResponseFactory.create_response(response)
         
-    except HTTPException as he:
-        return JSONResponse(
-            content={"detail": he.detail},
-            status_code=he.status_code
-        )
-    except Exception as e:
-        logger.error(f"🚨 POST 요청 처리 중 오류 발생: {str(e)}")
-        logger.error(f"🚨 오류 타입: {type(e).__name__}")
-        logger.error(f"🚨 오류 상세: {str(e)}")
-        import traceback
-        logger.error(f"🚨 스택 트레이스: {traceback.format_exc()}")
-        return JSONResponse(
-            content={"detail": f"Gateway error: {str(e)}", "error_type": type(e).__name__},
-            status_code=500
-        )
+#     except HTTPException as he:
+#         return JSONResponse(
+#             content={"detail": he.detail},
+#             status_code=he.status_code
+#         )
+#     except Exception as e:
+#         logger.error(f"🚨 POST 요청 처리 중 오류 발생: {str(e)}")
+#         logger.error(f"🚨 오류 타입: {type(e).__name__}")
+#         logger.error(f"🚨 오류 상세: {str(e)}")
+#         import traceback
+#         logger.error(f"🚨 스택 트레이스: {traceback.format_exc()}")
+#         return JSONResponse(
+#             content={"detail": f"Gateway error: {str(e)}", "error_type": type(e).__name__},
+#             status_code=500
+#         )
 
 @gateway_router.put("/{service}/{path:path}", summary="PUT 프록시")
 async def proxy_put(service: ServiceType, path: str, request: Request):
