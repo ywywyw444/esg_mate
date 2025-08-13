@@ -10,6 +10,7 @@ from contextlib import asynccontextmanager
 
 from app.www.jwt_auth_middleware import AuthMiddleware
 from app.domain.discovery.service_discovery import ServiceDiscovery
+from app.domain.discovery.service_type import ServiceType
 
 from app.common.utility.factory.response_factory import ResponseFactory
 
@@ -118,21 +119,12 @@ FILE_REQUIRED_SERVICES = set()
 
 @gateway_router.get("/{service}/{path:path}", summary="GET 프록시")
 async def proxy_get(
-    service: str, 
+    service: ServiceType, 
     path: str, 
     request: Request
 ):
     logger.info("🚀 GET 프록시 함수 시작!")
     try:
-        # 서비스 타입 유효성 검사
-        valid_services = ["chatbot", "gri", "materiality", "report", "tcfd", "user", "auth"]
-        if service not in valid_services:
-            logger.error(f"❌ 잘못된 서비스 타입: {service}")
-            return JSONResponse(
-                content={"detail": f"Invalid service type. Must be one of: {valid_services}"},
-                status_code=422
-            )
-        
         service_discovery = request.app.state.service_discovery
         headers = dict(request.headers)
 
@@ -162,7 +154,7 @@ import json
 
 @gateway_router.post("/{service}/{path:path}", summary="POST 프록시 (JSON 전용)")
 async def proxy_post_json(
-    service: str,
+    service: ServiceType,
     path: str,
     request: Request,
     # ✅ JSON 전용 바디 선언 → Swagger에 JSON 에디터 표시
@@ -175,15 +167,6 @@ async def proxy_post_json(
     logger.info(f"🚀 요청 URL: {request.url}")
 
     try:
-        # 서비스 타입 유효성 검사
-        valid_services = ["chatbot", "gri", "materiality", "report", "tcfd", "user", "auth"]
-        if service not in valid_services:
-            logger.error(f"❌ 잘못된 서비스 타입: {service}")
-            return JSONResponse(
-                content={"detail": f"Invalid service type. Must be one of: {valid_services}"},
-                status_code=422
-            )
-        
         service_discovery = request.app.state.service_discovery
         instance = service_discovery.get_service_instance(service)
         if not instance:
@@ -333,17 +316,8 @@ async def proxy_post_json(
 #         )
 
 @gateway_router.put("/{service}/{path:path}", summary="PUT 프록시")
-async def proxy_put(service: str, path: str, request: Request):
+async def proxy_put(service: ServiceType, path: str, request: Request):
     try:
-        # 서비스 타입 유효성 검사
-        valid_services = ["chatbot", "gri", "materiality", "report", "tcfd", "user", "auth"]
-        if service not in valid_services:
-            logger.error(f"❌ 잘못된 서비스 타입: {service}")
-            return JSONResponse(
-                content={"detail": f"Invalid service type. Must be one of: {valid_services}"},
-                status_code=422
-            )
-        
         service_discovery = request.app.state.service_discovery
         headers = dict(request.headers)
 
@@ -368,17 +342,8 @@ async def proxy_put(service: str, path: str, request: Request):
         )
 
 @gateway_router.delete("/{service}/{path:path}", summary="DELETE 프록시")
-async def proxy_delete(service: str, path: str, request: Request):
+async def proxy_delete(service: ServiceType, path: str, request: Request):
     try:
-        # 서비스 타입 유효성 검사
-        valid_services = ["chatbot", "gri", "materiality", "report", "tcfd", "user", "auth"]
-        if service not in valid_services:
-            logger.error(f"❌ 잘못된 서비스 타입: {service}")
-            return JSONResponse(
-                content={"detail": f"Invalid service type. Must be one of: {valid_services}"},
-                status_code=422
-            )
-        
         service_discovery = request.app.state.service_discovery
         headers = dict(request.headers)
 
@@ -403,17 +368,8 @@ async def proxy_delete(service: str, path: str, request: Request):
         )
 
 @gateway_router.patch("/{service}/{path:path}", summary="PATCH 프록시")
-async def proxy_patch(service: str, path: str, request: Request):
+async def proxy_patch(service: ServiceType, path: str, request: Request):
     try:
-        # 서비스 타입 유효성 검사
-        valid_services = ["chatbot", "gri", "materiality", "report", "tcfd", "user", "auth"]
-        if service not in valid_services:
-            logger.error(f"❌ 잘못된 서비스 타입: {service}")
-            return JSONResponse(
-                content={"detail": f"Invalid service type. Must be one of: {valid_services}"},
-                status_code=422
-            )
-        
         service_discovery = request.app.state.service_discovery
         headers = dict(request.headers)
 
@@ -484,7 +440,7 @@ async def not_found_handler(request: Request, exc):
     if len(path_parts) >= 5:
         logger.error(f"🎯 추출된 service: {path_parts[3]}")
         logger.error(f"🚨 추출된 path: {path_parts[4:]}")
-        logger.error(f"🚨 service 매칭 여부: {path_parts[3] in ['chatbot', 'gri', 'materiality', 'report', 'tcfd', 'user', 'auth']}")
+        logger.error(f"🚨 service 매칭 여부: {path_parts[3] in [s.value for s in ServiceType]}")
     
     logger.error(f"🚨 등록된 라우트들:")
     for route in app.routes:
