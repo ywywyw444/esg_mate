@@ -37,35 +37,34 @@ export default function LoginPage() {
   };
 
   // Login form submission
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // 직접 auth-service로 요청 (게이트웨이 우회)
-    // const apiUrl = 'https://auth-service-production-f2ef.up.railway.app';
-    const apiUrl = 'https://gateway-production-1104.up.railway.app/api/v1/auth/login';
-                axios.post(`${apiUrl}`, formData)
-      .then(response => {
-        console.log('Login response:', response.data);
-        
-                 // 성공 메시지 표시
-         if (response.data.success) {
-           alert(`✅ ${response.data.message}\n\n이름: ${response.data.name}\n이메일: ${response.data.email}\n회사 ID: ${response.data.company_id}`);
-           // 로그인 성공 후 메인페이지로 이동
-           router.push('/');
-         } else {
-          alert(`❌ ${response.data.message}`);
-        }
-      })
-      .catch(error => {
-        console.error('Login failed:', error);
-        
-        // 에러 응답 처리
-        if (error.response && error.response.data) {
-          alert(`❌ 로그인 실패: ${error.response.data.message || error.response.data.detail || '알 수 없는 오류'}`);
-        } else {
-          alert('❌ 로그인에 실패했습니다. 서버 연결을 확인해주세요.');
-        }
-      });
+    try {
+      // Gateway를 통한 로그인 요청
+      const apiUrl = 'https://gateway-production-1104.up.railway.app';
+      const response = await axios.post(`${apiUrl}/api/v1/auth/login`, formData);
+      
+      console.log('Login response:', response.data);
+      
+      // 성공 메시지 표시
+      if (response.data.success) {
+        alert(`✅ ${response.data.message}\n\n이름: ${response.data.name}\n이메일: ${response.data.email}\n회사 ID: ${response.data.company_id}`);
+        // 로그인 성공 후 메인페이지로 이동
+        router.push('/');
+      } else {
+        alert(`❌ ${response.data.message}`);
+      }
+    } catch (error: any) {
+      console.error('Login failed:', error);
+      
+      // 에러 응답 처리
+      if (error.response && error.response.data) {
+        alert(`❌ 로그인 실패: ${error.response.data.message || error.response.data.detail || '알 수 없는 오류'}`);
+      } else {
+        alert('❌ 로그인에 실패했습니다. 서버 연결을 확인해주세요.');
+      }
+    }
   };
 
   // Show loading while checking authentication status
