@@ -1,37 +1,100 @@
-from fastapi import APIRouter, Cookie, HTTPException, Query
+from fastapi import APIRouter, Cookie, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
+import logging
 
-# Google OAuth 관련 코드 (현재 사용하지 않음)
-# from app.domain.auth.controller.google_controller import GoogleController
+# 로거 설정
+logger = logging.getLogger(__name__)
 
-auth_router = APIRouter(prefix="/auth", tags=["auth"])
+# Pydantic BaseModel
+from pydantic import BaseModel, Field
+from typing import Optional
 
-# Google OAuth 관련 엔드포인트 (현재 사용하지 않음)
-# google_controller = GoogleController()
 
-# @auth_router.get("/google/login", summary="Google 로그인 시작")
-# async def google_login(
-#     redirect_uri: str = Query(
-#         default="http://localhost:3000/dashboard",
-#         description="로그인 후 리다이렉트할 URI (기본값: /dashboard)"
-#     )
-# ):
-#     """
-#     Google OAuth 로그인을 시작합니다.
-#     리다이렉트 URI는 state 파라미터로 전달되어 콜백 시 다시 받게 됩니다.
-#     """
-#     return await google_controller.start_google_login(redirect_uri)
+# 로그인 요청 모델
+class LoginRequest(BaseModel):
+    auth_id: str = Field(..., description="사용자 인증 ID", min_length=1)
+    auth_pw: str = Field(..., description="사용자 비밀번호", min_length=1)
 
-# @auth_router.get("/google/callback", summary="Google OAuth 콜백 처리")
-# async def google_callback(
-#     code: str = Query(..., description="Google OAuth 인증 코드"),
-#     state: str = Query(..., description="로그인 시작 시 전달한 state 값")
-# ):
-#     """
-#     Google OAuth 콜백을 처리합니다.
-#     인증 코드를 받아 처리하고 세션 토큰을 쿠키에 설정한 후 리다이렉트합니다.
-#     """
-#     return await google_controller.handle_google_callback(code, state)
+
+# 회원가입 요청 모델
+class SignupRequest(BaseModel):
+    company_id: str = Field(..., description="회사 ID", min_length=1)
+    industry: str = Field(..., description="산업 분야", min_length=1)
+    email: str = Field(..., description="이메일 주소", regex=r"^[^@]+@[^@]+\.[^@]+$")
+    name: str = Field(..., description="사용자 이름", min_length=1)
+    age: str = Field(..., description="나이", min_length=1)
+    auth_id: str = Field(..., description="인증 ID", min_length=1)
+    auth_pw: str = Field(..., description="인증 비밀번호", min_length=6)
+
+
+# 응답 모델
+class AuthResponse(BaseModel):
+    success: bool = Field(..., description="요청 성공 여부")
+    message: str = Field(..., description="응답 메시지")
+    user_id: Optional[str] = Field(None, description="사용자 ID")
+    email: Optional[str] = Field(None, description="이메일 주소")
+    name: Optional[str] = Field(None, description="사용자 이름")
+    company_id: Optional[str] = Field(None, description="회사 ID")
+
+
+auth_router = APIRouter(prefix="/auth", tags=["Auth"])
+
+
+
+@auth_router.post("/login", summary="로그인")
+async def login_process(request: Request):
+    logger.info("🔐 로그인 POST 요청 받음")
+    try:
+        form_data = await request.json()
+        logger.info(f"로그인 시도: {form_data.get('auth_id', 'N/A')}")
+
+        required_fields = ['auth_id', 'auth_pw']
+        missing_fields = [f for f in required_fields if not form_data.get(f)]
+        if missing_fields:
+            logger.warning(f"필수 필드 누락: {missing_fields}")
+            return {"success": False, "message": f"필수 필드가 누락되었습니다: {', '.join(missing_fields)}"}
+
+        # TODO: 서비스 연결 후 구현
+        return {"success": True, "message": "로그인 기능은 준비 중입니다."}
+
+    except Exception as e:
+        logger.error(f"로그인 처리 중 오류: {str(e)}")
+        return {"success": False, "message": f"로그인 처리 중 오류가 발생했습니다: {str(e)}"}
+
+@auth_router.post("/signup", summary="회원가입")
+async def signup_process(request: Request):
+    logger.info("📝 회원가입 POST 요청 받음")
+    try:
+        form_data = await request.json()
+
+        required_fields = ['company_id', 'industry', 'email', 'name', 'age', 'auth_id', 'auth_pw']
+        missing_fields = [f for f in required_fields if not form_data.get(f)]
+        if missing_fields:
+            logger.warning(f"필수 필드 누락: {missing_fields}")
+            return {"회원가입": "실패", "message": f"필수 필드가 누락되었습니다: {', '.join(missing_fields)}"}
+
+        logger.info("=== 회원가입 요청 데이터 ===")
+        logger.info(f"회사 ID: {form_data.get('company_id', 'N/A')}")
+        logger.info(f"산업: {form_data.get('industry', 'N/A')}")
+        logger.info(f"이메일: {form_data.get('email', 'N/A')}")
+        logger.info(f"이름: {form_data.get('name', 'N/A')}")
+        logger.info(f"나이: {form_data.get('age', 'N/A')}")
+        logger.info(f"인증 ID: {form_data.get('auth_id', 'N/A')}")
+        logger.info(f"인증 비밀번호: [PROTECTED]")
+        logger.info("==========================")
+
+        # TODO: 서비스 연결 후 구현
+        return {
+            "success": True,
+            "message": "회원가입 기능은 준비 중입니다.",
+            "user_id": "temp_user_id",
+            "email": form_data.get('email')
+        }
+
+    except Exception as e:
+        logger.error(f"회원가입 처리 중 오류: {str(e)}")
+        return {"회원가입": "실패", "오류": str(e)}
+
 
 @auth_router.post("/logout", summary="로그아웃")
 async def logout(session_token: str | None = Cookie(None)):
@@ -67,8 +130,7 @@ async def get_profile(session_token: str | None = Cookie(None)):
     if not session_token:
         raise HTTPException(status_code=401, detail="인증 쿠키가 없습니다.")
     try:
-        # Google OAuth 관련 코드 (현재 사용하지 않음)
-        # return await google_controller.get_user_profile(session_token)
+
         return {
             "success": True,
             "message": "프로필 조회 기능은 준비 중입니다. (Google OAuth 비활성화)"
