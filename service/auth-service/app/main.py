@@ -44,6 +44,9 @@ from app.common.database.database import get_db, create_tables, test_connection
 from app.domain.auth.service.signup_service import SignupService
 from app.domain.auth.service.login_service import LoginService
 
+# Router import
+from app.router.user_router import auth_router
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -130,24 +133,15 @@ app.add_middleware(
 )
 # -----------------------------------------
 
+# Router 등록 - user_router를 /api/v1/auth 경로로 등록
+app.include_router(auth_router, prefix="/api/v1")
 
-@app.get("/")
-async def root():
-    return {"message": "Auth Service", "version": "0.1.0"}
+# 기존 로그인/회원가입 엔드포인트를 /api/v1/auth 경로로 이동
+from fastapi import APIRouter
 
-@app.get("/test")
-async def test():
-    return {"message": "Auth Service Test Endpoint", "status": "success"}
+auth_main_router = APIRouter(prefix="/api/v1/auth", tags=["auth-main"])
 
-@app.get("/health")
-async def health_check():
-    return {"status": "healthy", "service": "auth-service"}
-
-@app.get("/login")
-async def login():
-    return {"message": "Login endpoint", "status": "success"}
-
-@app.post("/login")
+@auth_main_router.post("/login", summary="로그인")
 async def login_process(request: Request, db=Depends(get_db)):
     from sqlalchemy.ext.asyncio import AsyncSession
     db: AsyncSession = db
@@ -171,11 +165,7 @@ async def login_process(request: Request, db=Depends(get_db)):
         logger.error(f"로그인 처리 중 오류: {str(e)}")
         return {"success": False, "message": f"로그인 처리 중 오류가 발생했습니다: {str(e)}"}
 
-@app.get("/signup")
-async def signup():
-    return {"message": "Signup endpoint", "status": "success"}
-
-@app.post("/signup")
+@auth_main_router.post("/signup", summary="회원가입")
 async def signup_process(request: Request, db=Depends(get_db)):
     from sqlalchemy.ext.asyncio import AsyncSession
     db: AsyncSession = db
@@ -216,6 +206,24 @@ async def signup_process(request: Request, db=Depends(get_db)):
     except Exception as e:
         logger.error(f"회원가입 처리 중 오류: {str(e)}")
         return {"회원가입": "실패", "오류": str(e)}
+
+# auth_main_router 등록
+app.include_router(auth_main_router)
+
+
+@app.get("/")
+async def root():
+    return {"message": "Auth Service", "version": "0.1.0"}
+
+@app.get("/test")
+async def test():
+    return {"message": "Auth Service Test Endpoint", "status": "success"}
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "service": "auth-service"}
+
+
 
 if __name__ == "__main__":
     import uvicorn
