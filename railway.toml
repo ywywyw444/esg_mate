@@ -1,8 +1,7 @@
 [build]
-builder = "nixpacks"
+builder = "dockerfile"
 
 [deploy]
-startCommand = "cd gateway && python3.11 -m uvicorn app.main:app --host 0.0.0.0 --port $PORT"
 healthcheckPath = "/health"
 healthcheckTimeout = 300
 restartPolicyType = "on_failure"
@@ -15,6 +14,6 @@ PORT = "$PORT"
 
 # 서비스별 설정
 [deploy.services]
-frontend = { path = "frontend", buildCommand = "npm install && npm run build", startCommand = "npm start" }
-gateway = { path = "gateway", buildCommand = "python3.11 -m pip install -r requirements.txt", startCommand = "python3.11 -m uvicorn app.main:app --host 0.0.0.0 --port $PORT" }
-auth_service = { path = "service/auth-service", buildCommand = "python3.11 -m pip install -r requirements.txt", startCommand = "python3.11 -m uvicorn app.main:app --host 0.0.0.0 --port $PORT" }
+frontend = { path = "frontend", dockerfile = "Dockerfile" }
+gateway = { path = "gateway", dockerfile = "Dockerfile" }
+auth_service = { path = "service/auth-service", dockerfile = "Dockerfile" }
