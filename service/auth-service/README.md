@@ -70,9 +70,12 @@ auth-service/
 ├── Dockerfile                   # Docker 컨테이너 설정
 ├── docker-compose.yml           # 로컬 개발용 Docker Compose
 ├── .dockerignore                # Docker 빌드 최적화
-├── nixpacks.toml                # Railway 배포 설정
+├── railway.json                 # Railway Docker 빌드 설정
+├── nixpacks.toml                # Railway Nixpacks 설정 (백업)
 ├── deploy.sh                    # Docker 배포 스크립트
 ├── test-docker.sh               # Docker 테스트 스크립트
+├── setup-railway-docker.sh      # Railway Docker 설정 스크립트 (Linux/Mac)
+├── setup-railway-docker.ps1     # Railway Docker 설정 스크립트 (Windows)
 ├── requirements.txt             # 의존성 관리
 ├── env.example                  # 환경 변수 예시
 ├── RAILWAY_DEPLOY.md            # Railway 배포 상세 가이드
@@ -250,11 +253,22 @@ JWT_ACCESS_TOKEN_EXPIRE_MINUTES=30
 LOG_LEVEL=INFO
 ```
 
-#### 4. Docker 배포
+#### 4. Docker 빌더 설정
+```bash
+# Railway 대시보드에서:
+# 1. Settings → Build & Deploy
+# 2. Builder: Dockerfile 선택
+# 3. Dockerfile Path: Dockerfile
+
+# 또는 CLI로 설정:
+railway variables set RAILWAY_BUILDER="DOCKERFILE"
+```
+
+#### 5. Docker 배포
 ```bash
 # 자동 배포 (GitHub 연동)
 git add .
-git commit -m "Docker 배포 준비 완료"
+git commit -m "Docker 배포 설정 완료"
 git push origin main
 
 # 수동 배포
