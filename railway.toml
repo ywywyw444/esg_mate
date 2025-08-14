@@ -12,8 +12,8 @@ PYTHON_VERSION = "3.11"
 PYTHONPATH = "/app/gateway"
 PORT = "$PORT"
 
-# 서비스별 설정
+# 서비스별 설정 - 각 서비스의 경로만 지정
 [deploy.services]
-frontend = { path = "frontend", dockerfile = "Dockerfile" }
-gateway = { path = "gateway", dockerfile = "Dockerfile" }
-auth_service = { path = "service/auth-service", dockerfile = "Dockerfile" }
+frontend = { path = "frontend" }
+gateway = { path = "gateway" }
+auth_service = { path = "service/auth-service" }
