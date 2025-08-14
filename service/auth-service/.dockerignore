@@ -1,24 +1,12 @@
-# Git 관련
 .git
 .gitignore
-README.md
-
-# 환경 변수
 .env
-.env.local
-.env.production
-
-# Python 캐시
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
 env/
-venv/
-.venv/
-
-# 빌드 파일
 build/
 develop-eggs/
 dist/
@@ -33,22 +21,7 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
-
-# IDE
+venv/
+.venv/
 .idea/
-.vscode/
-*.swp
-*.swo
-
-# 로그 파일
-*.log
-logs/
-
-# 테스트 파일
-tests/
-test_*.py
-*_test.py
-
-# 기타
-.DS_Store
-Thumbs.db 
+.vscode/ 
