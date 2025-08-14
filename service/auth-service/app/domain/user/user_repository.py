@@ -4,7 +4,7 @@ User Repository - BaseModel을 받아서 데이터베이스 작업을 수행하�
 """
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from app.domain.user.user_model import UserModel
+from app.domain.user.user_schema import UserModel
 from app.domain.user.user_entity import UserEntity
 from app.common.database.database import get_db
 import logging
