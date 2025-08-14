@@ -67,9 +67,16 @@ auth-service/
 │   ├── router/
 │   │   └── user_router.py       # API 라우터
 │   └── main.py                  # 메인 애플리케이션
-├── Dockerfile                   # 컨테이너 설정
+├── Dockerfile                   # Docker 컨테이너 설정
+├── docker-compose.yml           # 로컬 개발용 Docker Compose
+├── .dockerignore                # Docker 빌드 최적화
+├── nixpacks.toml                # Railway 배포 설정
+├── deploy.sh                    # Docker 배포 스크립트
+├── test-docker.sh               # Docker 테스트 스크립트
 ├── requirements.txt             # 의존성 관리
-└── env.example                  # 환경 변수 예시
+├── env.example                  # 환경 변수 예시
+├── RAILWAY_DEPLOY.md            # Railway 배포 상세 가이드
+└── README.md                    # 프로젝트 문서
 ```
 
 ## 🛠️ 설치 및 실행
@@ -95,9 +102,42 @@ uvicorn app.main:app --host 0.0.0.0 --port 8008 --reload
 ```
 
 ### 4. Docker 실행
+
+#### A. 단일 컨테이너 실행
 ```bash
 docker build -t auth-service .
 docker run -p 8008:8008 --env-file .env auth-service
+```
+
+#### B. Docker Compose로 실행 (PostgreSQL 포함)
+```bash
+# 환경 변수 파일 생성
+cp env.example .env
+# .env 파일 편집
+
+# Docker Compose 실행
+docker-compose up -d
+
+# 테스트
+curl http://localhost:8008/health
+```
+
+#### C. 배포 스크립트 사용
+```bash
+# Linux/Mac
+./deploy.sh
+
+# Windows PowerShell
+.\deploy.sh
+```
+
+#### D. 테스트 스크립트 사용
+```bash
+# Linux/Mac
+./test-docker.sh
+
+# Windows PowerShell
+.\test-docker.sh
 ```
 
 ## 🌐 API 엔드포인트
@@ -179,27 +219,62 @@ CREATE TABLE user (
 
 ## 🚀 Railway 배포
 
-### 1. Railway CLI 설치
+### Docker 기반 배포
+
+#### 1. Railway CLI 설치
 ```bash
 npm install -g @railway/cli
 ```
 
-### 2. 프로젝트 연결
+#### 2. 프로젝트 연결
 ```bash
 railway login
 railway link
 ```
 
-### 3. 환경 변수 설정
+#### 3. 환경 변수 설정
 ```bash
-railway variables set DATABASE_URL="your_railway_postgres_url"
-railway variables set JWT_SECRET_KEY="your_secret_key"
+# Railway 대시보드 → Variables 탭에서 설정
+DATABASE_URL=postgresql+asyncpg://postgres:password@your-railway-postgres-url
+JWT_SECRET_KEY=your_super_secret_jwt_key_here
+PORT=8008
+ENVIRONMENT=production
+DB_POOL_SIZE=20
+DB_MAX_OVERFLOW=30
+DB_POOL_TIMEOUT=30
+DB_POOL_RECYCLE=3600
+DB_POOL_PRE_PING=true
+DB_ECHO=false
+JWT_ALGORITHM=HS256
+JWT_ACCESS_TOKEN_EXPIRE_MINUTES=30
+LOG_LEVEL=INFO
 ```
 
-### 4. 배포
+#### 4. Docker 배포
 ```bash
+# 자동 배포 (GitHub 연동)
+git add .
+git commit -m "Docker 배포 준비 완료"
+git push origin main
+
+# 수동 배포
 railway up
 ```
+
+#### 5. 배포 확인
+```bash
+# 배포 상태 확인
+railway status
+
+# 로그 확인
+railway logs
+
+# 서비스 URL 확인
+railway domain
+```
+
+### 상세 배포 가이드
+자세한 배포 방법은 [RAILWAY_DEPLOY.md](./RAILWAY_DEPLOY.md) 파일을 참조하세요.
 
 ## 🧪 테스트
 
