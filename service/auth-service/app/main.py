@@ -14,7 +14,7 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi import APIRouter
 
 # Router import
-from app.router.user_router import auth_router
+from app.router.auth_router import auth_router
 
 
 # 환경 변수 로드
