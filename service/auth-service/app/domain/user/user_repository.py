@@ -61,13 +61,9 @@ class UserRepository:
                 user_entity = result.scalar_one_or_none()
                 
                 if user_entity:
-                    # Entity를 LoginRequest로 변환하여 반환 (로그인용)
-                    user_model = LoginRequest(
-                        auth_id=user_entity.auth_id,
-                        auth_pw=user_entity.auth_pw
-                    )
+                    # Entity 자체를 반환 (로그인 시 모든 정보 필요)
                     logger.info(f"✅ 리포지토리: 사용자 조회 성공 - {auth_id}")
-                    return user_model
+                    return user_entity
                 else:
                     logger.info(f"❌ 리포지토리: 사용자 없음 - {auth_id}")
                     return None
