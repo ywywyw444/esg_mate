@@ -10,11 +10,18 @@ RUN apt-get update && apt-get install -y \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
+# Python 환경 설정
+ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
 # Python 의존성 파일 복사
 COPY requirements.txt .
 
-# Python 패키지 설치
-RUN pip install --no-cache-dir -r requirements.txt
+# Python 패키지 설치 (캐시 제거 및 강제 재설치)
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt && \
+    pip list
 
 # 애플리케이션 코드 복사
 COPY . .
@@ -22,13 +29,9 @@ COPY . .
 # 포트 노출 (Railway 동적 포트 지원)
 EXPOSE 8008
 
-# 환경 변수 설정
-ENV PYTHONPATH=/app
-ENV PYTHONUNBUFFERED=1
-
 # 헬스체크 추가
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8008/health || exit 1
 
 # 애플리케이션 실행 (Railway 동적 포트 지원)
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8008"]
+CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8008"]
