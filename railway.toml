@@ -1,3 +1,4 @@
+# Railway 설정 - Gateway 서비스 배포
 [build]
 builder = "dockerfile"
 
@@ -11,9 +12,3 @@ NODE_ENV = "production"
 PYTHON_VERSION = "3.11"
 PYTHONPATH = "/app/gateway"
 PORT = "$PORT"
-
-# 서비스별 설정 - 각 서비스의 경로만 지정
-[deploy.services]
-frontend = { path = "frontend" }
-gateway = { path = "gateway" }
-auth_service = { path = "service/auth-service" }
