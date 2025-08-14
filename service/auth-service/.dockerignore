@@ -2,7 +2,6 @@
 .git
 .gitignore
 README.md
-RAILWAY_DEPLOY.md
 
 # 환경 변수
 .env
@@ -49,15 +48,6 @@ logs/
 tests/
 test_*.py
 *_test.py
-
-# Docker 관련
-Dockerfile*
-.dockerignore
-docker-compose*.yml
-
-# Railway 관련
-railway.json
-nixpacks.toml
 
 # 기타
 .DS_Store

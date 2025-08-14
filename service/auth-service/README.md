@@ -68,17 +68,10 @@ auth-service/
 │   │   └── user_router.py       # API 라우터
 │   └── main.py                  # 메인 애플리케이션
 ├── Dockerfile                   # Docker 컨테이너 설정
-├── docker-compose.yml           # 로컬 개발용 Docker Compose
 ├── .dockerignore                # Docker 빌드 최적화
 ├── railway.json                 # Railway Docker 빌드 설정
-├── nixpacks.toml                # Railway Nixpacks 설정 (백업)
-├── deploy.sh                    # Docker 배포 스크립트
-├── test-docker.sh               # Docker 테스트 스크립트
-├── setup-railway-docker.sh      # Railway Docker 설정 스크립트 (Linux/Mac)
-├── setup-railway-docker.ps1     # Railway Docker 설정 스크립트 (Windows)
 ├── requirements.txt             # 의존성 관리
 ├── env.example                  # 환경 변수 예시
-├── RAILWAY_DEPLOY.md            # Railway 배포 상세 가이드
 └── README.md                    # 프로젝트 문서
 ```
 
@@ -112,35 +105,18 @@ docker build -t auth-service .
 docker run -p 8008:8008 --env-file .env auth-service
 ```
 
-#### B. Docker Compose로 실행 (PostgreSQL 포함)
+#### B. 로컬 Docker 테스트
 ```bash
 # 환경 변수 파일 생성
 cp env.example .env
 # .env 파일 편집
 
-# Docker Compose 실행
-docker-compose up -d
+# Docker 이미지 빌드 및 실행
+docker build -t auth-service .
+docker run -p 8008:8008 --env-file .env auth-service
 
 # 테스트
 curl http://localhost:8008/health
-```
-
-#### C. 배포 스크립트 사용
-```bash
-# Linux/Mac
-./deploy.sh
-
-# Windows PowerShell
-.\deploy.sh
-```
-
-#### D. 테스트 스크립트 사용
-```bash
-# Linux/Mac
-./test-docker.sh
-
-# Windows PowerShell
-.\test-docker.sh
 ```
 
 ## 🌐 API 엔드포인트
