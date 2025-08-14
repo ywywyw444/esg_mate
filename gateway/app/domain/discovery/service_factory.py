@@ -8,7 +8,6 @@ logger = logging.getLogger(__name__)
 
 # 서비스 URL 매핑
 SERVICE_URLS = {
-    # "auth-service": os.getenv("AUTH_SERVICE_URL", "https://auth-service-production-f2ef.up.railway.app"),
     "auth-service": os.getenv("AUTH_SERVICE_URL", "https://auth-service-production-f2ef.up.railway.app"),
     "chatbot-service": os.getenv("CHATBOT_SERVICE_URL", "https://chatbot-service-production-93a9.up.railway.app"),
     "gri-service": os.getenv("GRI_SERVICE_URL", "https://gri-service-production.up.railway.app"),
