@@ -4,7 +4,7 @@ User Repository - BaseModel을 받아서 데이터베이스 작업을 수행하�
 """
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from app.domain.user.user_schema import SignupRequest
+from app.domain.user.user_schema import SignupRequest, LoginRequest
 from app.domain.user.user_entity import UserEntity
 from app.common.database.database import get_db
 import logging
@@ -61,13 +61,8 @@ class UserRepository:
                 user_entity = result.scalar_one_or_none()
                 
                 if user_entity:
-                    # Entity를 BaseModel로 변환하여 반환
-                    user_model = SignupRequest(
-                        company_id=user_entity.company_id,
-                        industry=user_entity.industry,
-                        email=user_entity.email,
-                        name=user_entity.name,
-                        age=user_entity.age,
+                    # Entity를 LoginRequest로 변환하여 반환 (로그인용)
+                    user_model = LoginRequest(
                         auth_id=user_entity.auth_id,
                         auth_pw=user_entity.auth_pw
                     )
