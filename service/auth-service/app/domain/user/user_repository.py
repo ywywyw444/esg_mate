@@ -4,7 +4,7 @@ User Repository - BaseModel을 받아서 데이터베이스 작업을 수행하�
 """
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from app.domain.user.user_schema import UserModel
+from app.domain.user.user_schema import SignupRequest
 from app.domain.user.user_entity import UserEntity
 from app.common.database.database import get_db
 import logging
@@ -28,20 +28,19 @@ class UserRepository:
                 result = await db.execute(query)
                 user_entity = result.scalar_one_or_none()
                 
-                if user_entity:
-                    # Entity를 BaseModel로 변환하여 반환
-                    user_model = UserModel(
-                        id=user_entity.id,
-                        company_id=user_entity.company_id,
-                        industry=user_entity.industry,
-                        email=user_entity.email,
-                        name=user_entity.name,
-                        age=user_entity.age,
-                        auth_id=user_entity.auth_id,
-                        auth_pw=user_entity.auth_pw
-                    )
-                    logger.info(f"✅ 리포지토리: 사용자 조회 성공 - {email}")
-                    return user_model
+                                 if user_entity:
+                     # Entity를 BaseModel로 변환하여 반환
+                     user_model = SignupRequest(
+                         company_id=user_entity.company_id,
+                         industry=user_entity.industry,
+                         email=user_entity.email,
+                         name=user_entity.name,
+                         age=user_entity.age,
+                         auth_id=user_entity.auth_id,
+                         auth_pw=user_entity.auth_pw
+                     )
+                     logger.info(f"✅ 리포지토리: 사용자 조회 성공 - {email}")
+                     return user_model
                 else:
                     logger.info(f"❌ 리포지토리: 사용자 없음 - {email}")
                     return None
@@ -61,20 +60,19 @@ class UserRepository:
                 result = await db.execute(query)
                 user_entity = result.scalar_one_or_none()
                 
-                if user_entity:
-                    # Entity를 BaseModel로 변환하여 반환
-                    user_model = UserModel(
-                        id=user_entity.id,
-                        company_id=user_entity.company_id,
-                        industry=user_entity.industry,
-                        email=user_entity.email,
-                        name=user_entity.name,
-                        age=user_entity.age,
-                        auth_id=user_entity.auth_id,
-                        auth_pw=user_entity.auth_pw
-                    )
-                    logger.info(f"✅ 리포지토리: 사용자 조회 성공 - {auth_id}")
-                    return user_model
+                                 if user_entity:
+                     # Entity를 BaseModel로 변환하여 반환
+                     user_model = SignupRequest(
+                         company_id=user_entity.company_id,
+                         industry=user_entity.industry,
+                         email=user_entity.email,
+                         name=user_entity.name,
+                         age=user_entity.age,
+                         auth_id=user_entity.auth_id,
+                         auth_pw=user_entity.auth_pw
+                     )
+                     logger.info(f"✅ 리포지토리: 사용자 조회 성공 - {auth_id}")
+                     return user_model
                 else:
                     logger.info(f"❌ 리포지토리: 사용자 없음 - {auth_id}")
                     return None
@@ -94,20 +92,19 @@ class UserRepository:
                 result = await db.execute(query)
                 user_entity = result.scalar_one_or_none()
                 
-                if user_entity:
-                    # Entity를 BaseModel로 변환하여 반환
-                    user_model = UserModel(
-                        id=user_entity.id,
-                        company_id=user_entity.company_id,
-                        industry=user_entity.industry,
-                        email=user_entity.email,
-                        name=user_entity.name,
-                        age=user_entity.age,
-                        auth_id=user_entity.auth_id,
-                        auth_pw=user_entity.auth_pw
-                    )
-                    logger.info(f"✅ 리포지토리: 사용자 조회 성공 - ID: {user_id}")
-                    return user_model
+                                 if user_entity:
+                     # Entity를 BaseModel로 변환하여 반환
+                     user_model = SignupRequest(
+                         company_id=user_entity.company_id,
+                         industry=user_entity.industry,
+                         email=user_entity.email,
+                         name=user_entity.name,
+                         age=user_entity.age,
+                         auth_id=user_entity.auth_id,
+                         auth_pw=user_entity.auth_pw
+                     )
+                     logger.info(f"✅ 리포지토리: 사용자 조회 성공 - ID: {user_id}")
+                     return user_model
                 else:
                     logger.info(f"❌ 리포지토리: 사용자 없음 - ID: {user_id}")
                     return None
@@ -141,18 +138,17 @@ class UserRepository:
                 
                 logger.info(f"✅ 리포지토리: 사용자 생성 완료 - {new_user_entity.email} (ID: {new_user_entity.id})")
                 
-                # 생성된 Entity를 BaseModel로 변환하여 반환
-                user_model = UserModel(
-                    id=new_user_entity.id,
-                    company_id=new_user_entity.company_id,
-                    industry=new_user_entity.industry,
-                    email=new_user_entity.email,
-                    name=new_user_entity.name,
-                    age=new_user_entity.age,
-                    auth_id=new_user_entity.auth_id,
-                    auth_pw=new_user_entity.auth_pw
-                )
-                return user_model
+                                       # 생성된 Entity를 BaseModel로 변환하여 반환
+                       user_model = SignupRequest(
+                           company_id=new_user_entity.company_id,
+                           industry=new_user_entity.industry,
+                           email=new_user_entity.email,
+                           name=new_user_entity.name,
+                           age=new_user_entity.age,
+                           auth_id=new_user_entity.auth_id,
+                           auth_pw=new_user_entity.auth_pw
+                       )
+                       return user_model
                 
         except Exception as e:
             logger.error(f"❌ 리포지토리: 사용자 생성 중 오류 - {str(e)}")
