@@ -5,41 +5,10 @@ import logging
 # 로거 설정
 logger = logging.getLogger(__name__)
 
-# Pydantic BaseModel
-from pydantic import BaseModel, Field
-from typing import Optional
-
-
-# 로그인 요청 모델
-class LoginRequest(BaseModel):
-    auth_id: str = Field(..., description="사용자 인증 ID", min_length=1)
-    auth_pw: str = Field(..., description="사용자 비밀번호", min_length=1)
-
-
-# 회원가입 요청 모델
-class SignupRequest(BaseModel):
-    company_id: str = Field(..., description="회사 ID", min_length=1)
-    industry: str = Field(..., description="산업 분야", min_length=1)
-    email: str = Field(..., description="이메일 주소", pattern=r"^[^@]+@[^@]+\.[^@]+$")
-    name: str = Field(..., description="사용자 이름", min_length=1)
-    age: str = Field(..., description="나이", min_length=1)
-    auth_id: str = Field(..., description="인증 ID", min_length=1)
-    auth_pw: str = Field(..., description="인증 비밀번호", min_length=6)
-
-
-# 응답 모델
-class AuthResponse(BaseModel):
-    success: bool = Field(..., description="요청 성공 여부")
-    message: str = Field(..., description="응답 메시지")
-    user_id: Optional[str] = Field(None, description="사용자 ID")
-    email: Optional[str] = Field(None, description="이메일 주소")
-    name: Optional[str] = Field(None, description="사용자 이름")
-    company_id: Optional[str] = Field(None, description="회사 ID")
-
+from app.domain.user.user_schema import LoginRequest, SignupRequest
+from app.domain.user.user_controller import user_controller
 
 auth_router = APIRouter(prefix="/auth-service", tags=["Auth"])
-
-
 
 @auth_router.post("/login", summary="로그인")
 async def login_process(request: Request):
@@ -47,7 +16,6 @@ async def login_process(request: Request):
     try:
         form_data = await request.json()
         logger.info(f"로그인 시도: {form_data.get('auth_id', 'N/A')}")
-        logger.info(f"로그인 시도: {form_data.get('auth_pw', 'N/A')}")
 
         required_fields = ['auth_id', 'auth_pw']
         missing_fields = [f for f in required_fields if not form_data.get(f)]
@@ -55,46 +23,18 @@ async def login_process(request: Request):
             logger.warning(f"필수 필드 누락: {missing_fields}")
             return {"success": False, "message": f"필수 필드가 누락되었습니다: {', '.join(missing_fields)}"}
 
-        # 테스트용 하드코딩된 사용자 정보
-        test_users = {
-            "admin": {
-                "password": "admin123",
-                "name": "관리자",
-                "email": "admin@example.com",
-                "company_id": "COMP001",
-                "user_id": "user_001"
-            },
-            "test": {
-                "password": "test123",
-                "name": "테스트 사용자",
-                "email": "test@example.com",
-                "company_id": "COMP002",
-                "user_id": "user_002"
-            }
-        }
-
-        auth_id = form_data.get('auth_id')
-        auth_pw = form_data.get('auth_pw')
-
-        # 사용자 인증 확인
-        if auth_id in test_users and test_users[auth_id]['password'] == auth_pw:
-            user_info = test_users[auth_id]
-            logger.info(f"✅ 로그인 성공: {auth_id}")
+        # JSON을 LoginRequest BaseModel로 변환
+        try:
+            login_request = LoginRequest(**form_data)
+            logger.info(f"✅ 로그인 데이터 검증 성공: {login_request.auth_id}")
             
-            return {
-                "success": True,
-                "message": "로그인 성공!",
-                "user_id": user_info['user_id'],
-                "name": user_info['name'],
-                "email": user_info['email'],
-                "company_id": user_info['company_id']
-            }
-        else:
-            logger.warning(f"❌ 로그인 실패: 잘못된 인증 정보 - {auth_id}")
-            return {
-                "success": False,
-                "message": "아이디 또는 비밀번호가 올바르지 않습니다."
-            }
+            # user_controller로 BaseModel 전달 (데이터베이스 연결 없음)
+            result = await user_controller.login_user(login_request)
+            return result
+                
+        except Exception as validation_error:
+            logger.error(f"로그인 데이터 검증 실패: {validation_error}")
+            return {"success": False, "message": f"입력 데이터가 올바르지 않습니다: {str(validation_error)}"}
 
     except Exception as e:
         logger.error(f"로그인 처리 중 오류: {str(e)}")
@@ -110,7 +50,7 @@ async def signup_process(request: Request):
         missing_fields = [f for f in required_fields if not form_data.get(f)]
         if missing_fields:
             logger.warning(f"필수 필드 누락: {missing_fields}")
-            return {"회원가입": "실패", "message": f"필수 필드가 누락되었습니다: {', '.join(missing_fields)}"}
+            return {"success": False, "message": f"필수 필드가 누락되었습니다: {', '.join(missing_fields)}"}
 
         logger.info("=== 회원가입 요청 데이터 ===")
         logger.info(f"회사 ID: {form_data.get('company_id', 'N/A')}")
@@ -122,18 +62,22 @@ async def signup_process(request: Request):
         logger.info(f"인증 비밀번호: [PROTECTED]")
         logger.info("==========================")
 
-        # TODO: 서비스 연결 후 구현
-        return {
-            "success": True,
-            "message": "회원가입 기능은 준비 중입니다.",
-            "user_id": "temp_user_id",
-            "email": form_data.get('email')
-        }
+        # JSON을 SignupRequest BaseModel로 변환
+        try:
+            signup_request = SignupRequest(**form_data)
+            logger.info(f"✅ 회원가입 데이터 검증 성공: {signup_request.email}")
+            
+            # user_controller로 BaseModel 전달 (데이터베이스 연결 없음)
+            result = await user_controller.signup_user(signup_request)
+            return result
+            
+        except Exception as validation_error:
+            logger.error(f"회원가입 데이터 검증 실패: {validation_error}")
+            return {"success": False, "message": f"입력 데이터가 올바르지 않습니다: {str(validation_error)}"}
 
     except Exception as e:
         logger.error(f"회원가입 처리 중 오류: {str(e)}")
         return {"회원가입": "실패", "오류": str(e)}
-
 
 @auth_router.post("/logout", summary="로그아웃")
 async def logout(session_token: str | None = Cookie(None)):

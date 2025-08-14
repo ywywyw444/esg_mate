@@ -1,19 +1,19 @@
 """
-User Entity
+User Entity - SQLAlchemy 모델
 """
-from pydantic import BaseModel
-from typing import Optional
+from sqlalchemy import Column, Integer, Text
+from app.common.database.database import Base
 
-class UserEntity(BaseModel):
-    """사용자 엔티티"""
-    id: Optional[int] = None
-    company_id: str
-    industry: str
-    email: str
-    name: str
-    age: str
-    auth_id: str
-    auth_pw: str
+class UserEntity(Base):
+    """사용자 SQLAlchemy 모델"""
+    __tablename__ = "user"
 
-    class Config:
-        from_attributes = True
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    company_id = Column(Text, nullable=False)
+    industry = Column(Text, nullable=False)
+    email = Column(Text, nullable=False, unique=True)
+    name = Column(Text, nullable=False)
+    age = Column(Text, nullable=False)
+    auth_id = Column(Text, nullable=False, unique=True)
+    auth_pw = Column(Text, nullable=False)
+
