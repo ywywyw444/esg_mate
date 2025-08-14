@@ -14,14 +14,16 @@ RUN apt-get update && apt-get install -y \
 ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
+ENV PIP_NO_CACHE_DIR=1
 
 # Python 의존성 파일 복사
 COPY requirements.txt .
 
 # Python 패키지 설치 (캐시 제거 및 강제 재설치)
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt && \
-    pip list
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt && \
+    pip list && \
+    python -c "import uvicorn; print('uvicorn 설치 확인:', uvicorn.__version__)"
 
 # 애플리케이션 코드 복사
 COPY . .

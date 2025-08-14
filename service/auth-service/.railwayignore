@@ -1,0 +1,8 @@
+# Railway Nixpacks 사용 금지
+nixpacks.toml
+.railwayignore
+
+# Docker 빌드만 사용
+Dockerfile
+.dockerignore
+railway.json
