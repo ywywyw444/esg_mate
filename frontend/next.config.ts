@@ -5,6 +5,8 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ['@radix-ui/react-icons'],
   },
+  // 커스텀 도메인을 위한 설정
+  trailingSlash: false,
   // PWA를 위한 설정
   headers: async () => {
     return [

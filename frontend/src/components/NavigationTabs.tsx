@@ -1,11 +1,19 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 
 export default function NavigationTabs() {
   const router = useRouter();
   const pathname = usePathname();
+  const [isCustomDomain, setIsCustomDomain] = useState(false);
+  
+  useEffect(() => {
+    // 커스텀 도메인인지 확인
+    const hostname = window.location.hostname;
+    const isCustom = !hostname.includes('vercel.app') && !hostname.includes('localhost');
+    setIsCustomDomain(isCustom);
+  }, []);
   
   // 현재 경로에 따라 활성 탭 결정
   const getActiveTab = () => {
@@ -28,7 +36,14 @@ export default function NavigationTabs() {
 
   const handleTabClick = (tab: typeof navigationTabs[0]) => {
     setActiveTab(tab.id);
-    router.push(tab.path);
+    
+    if (isCustomDomain) {
+      // 커스텀 도메인에서는 window.location.href 사용
+      window.location.href = tab.path;
+    } else {
+      // Vercel 도메인에서는 Next.js router 사용
+      router.push(tab.path);
+    }
   };
 
   return (
