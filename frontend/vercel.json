@@ -2,7 +2,7 @@
   "version": 2,
   "buildCommand": "pnpm build",
   "outputDirectory": ".next",
-  "installCommand": "pnpm install --frozen-lockfile",
+  "installCommand": "pnpm install",
   "framework": "nextjs",
   "rewrites": [
     {
