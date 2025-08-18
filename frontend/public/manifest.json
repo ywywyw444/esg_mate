@@ -1,0 +1,70 @@
+{
+  "name": "Est Mate - 지속가능성 보고서 작성 도구",
+  "short_name": "Est Mate",
+  "description": "GRI, TCFD 등 지속가능성 보고서 작성을 위한 종합 플랫폼",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0d9488",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "ko",
+  "categories": ["business", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "대시보드",
+      "short_name": "대시보드",
+      "description": "메인 대시보드로 이동",
+      "url": "/dashboard",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "GRI 보고서",
+      "short_name": "GRI",
+      "description": "GRI 보고서 작성",
+      "url": "/gri/intake",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "TCFD 보고서",
+      "short_name": "TCFD",
+      "description": "TCFD 보고서 작성",
+      "url": "/tcfd/intake",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오프라인 - Est Mate</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .offline-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .offline-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 28px;
+        }
+
+        p {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .retry-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .retry-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .offline-features {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid #eee;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            color: #666;
+        }
+
+        .feature-icon {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="offline-icon">📱</div>
+        <h1>오프라인 상태입니다</h1>
+        <p>
+            인터넷 연결을 확인하고 다시 시도해주세요.<br>
+            Est Mate는 오프라인에서도 기본 기능을 사용할 수 있습니다.
+        </p>
+        
+        <button class="retry-button" onclick="window.location.reload()">
+            다시 시도
+        </button>
+
+        <div class="offline-features">
+            <div class="feature">
+                <span class="feature-icon">✅</span>
+                <span>캐시된 페이지 접근 가능</span>
+            </div>
+            <div class="feature">
+                <span class="feature-icon">✅</span>
+                <span>기본 기능 사용 가능</span>
+            </div>
+            <div class="feature">
+                <span class="feature-icon">✅</span>
+                <span>데이터 손실 없음</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 네트워크 상태 모니터링
+        window.addEventListener('online', () => {
+            window.location.reload();
+        });
+
+        // 주기적으로 네트워크 상태 확인
+        setInterval(() => {
+            if (navigator.onLine) {
+                window.location.reload();
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
