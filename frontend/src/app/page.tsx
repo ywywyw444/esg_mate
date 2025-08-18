@@ -86,12 +86,12 @@ export default function Home() {
               <h1 className="text-white text-xl font-medium">정태영의 인생사</h1>
             </div>
             
-            {/* 우측 메뉴 - 기존 URL들 보존 */}
+            {/* 우측 메뉴 - 올바른 경로로 수정 */}
             <div className="flex items-center space-x-6">
-              <Link href="/login" className="text-white hover:text-gray-300 text-sm font-medium">
+              <Link href="/auth/login" className="text-white hover:text-gray-300 text-sm font-medium">
                 LOGIN
               </Link>
-              <Link href="/signup" className="text-white hover:text-gray-300 text-sm font-medium">
+              <Link href="/auth/signup" className="text-white hover:text-gray-300 text-sm font-medium">
                 SIGNUP
               </Link>
               <button className="text-white hover:text-gray-300">
@@ -103,14 +103,14 @@ export default function Home() {
           </div>
         </div>
         
-        {/* 모바일 메뉴 - 기존 URL들 보존 */}
+        {/* 모바일 메뉴 - 올바른 경로로 수정 */}
         {isMenuOpen && (
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t border-gray-100">
-              <Link href="/login" className="text-gray-600 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium">
+              <Link href="/auth/login" className="text-gray-600 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium">
                 LOGIN
               </Link>
-              <Link href="/signup" className="text-gray-600 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium">
+              <Link href="/auth/signup" className="text-gray-600 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium">
                 SIGNUP
               </Link>
             </div>
@@ -187,12 +187,12 @@ export default function Home() {
             Click here to add your own text and edit me.
           </p>
           
-          {/* CTA 버튼들 - 기존 URL들 보존 */}
+          {/* CTA 버튼들 - 올바른 경로로 수정 */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/login" className="bg-white text-teal-900 hover:bg-gray-100 px-8 py-4 rounded-lg text-lg font-semibold transition-colors duration-200">
+            <Link href="/auth/login" className="bg-white text-teal-900 hover:bg-gray-100 px-8 py-4 rounded-lg text-lg font-semibold transition-colors duration-200">
               로그인하기
             </Link>
-            <Link href="/signup" className="border-2 border-white text-white hover:bg-white hover:text-teal-900 px-8 py-4 rounded-lg text-lg font-semibold transition-colors duration-200">
+            <Link href="/auth/signup" className="border-2 border-white text-white hover:bg-white hover:text-teal-900 px-8 py-4 rounded-lg text-lg font-semibold transition-colors duration-200">
               회원가입
             </Link>
           </div>
@@ -256,7 +256,7 @@ export default function Home() {
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">로그인</h3>
                 <p className="text-gray-600 text-sm mb-4">사용자 인증 서비스</p>
-                <Link href="/login" className="text-blue-600 hover:text-blue-700 font-medium text-sm">
+                <Link href="/auth/login" className="text-blue-600 hover:text-blue-700 font-medium text-sm">
                   바로가기 →
                 </Link>
               </div>
@@ -272,7 +272,7 @@ export default function Home() {
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">회원가입</h3>
                 <p className="text-gray-600 text-sm mb-4">새 계정 생성</p>
-                <Link href="/signup" className="text-green-600 hover:text-green-700 font-medium text-sm">
+                <Link href="/auth/signup" className="text-green-600 hover:text-green-700 font-medium text-sm">
                   바로가기 →
                 </Link>
               </div>
@@ -326,8 +326,8 @@ export default function Home() {
             <div>
               <h4 className="font-semibold mb-4">서비스</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><Link href="/login" className="hover:text-white">로그인</Link></li>
-                <li><Link href="/signup" className="hover:text-white">회원가입</Link></li>
+                <li><Link href="/auth/login" className="hover:text-white">로그인</Link></li>
+                <li><Link href="/auth/signup" className="hover:text-white">회원가입</Link></li>
                 <li><a href="http://localhost:8080/docs" target="_blank" rel="noopener noreferrer" className="hover:text-white">API 문서</a></li>
               </ul>
             </div>
