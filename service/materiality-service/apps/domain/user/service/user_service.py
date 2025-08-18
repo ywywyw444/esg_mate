@@ -81,7 +81,7 @@ class UserService:
                 'industry': signup_data.industry,
                 'email': signup_data.email,
                 'name': signup_data.name,
-                'age': signup_data.age,
+                'birth': signup_data.birth,
                 'auth_id': signup_data.auth_id,
                 'auth_pw': hashed_password
             }
@@ -123,7 +123,7 @@ class UserService:
                         "name": user.name,
                         "company_id": user.company_id,
                         "industry": user.industry,
-                        "age": user.age
+                        "birth": user.birth
                     }
                 }
             else:

@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/domain/auth/store/auth.store';
+import { useAuthStore } from '../../../../store/auth.store';
 import axios from 'axios';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { isInitialized, checkAuthStatus } = useAuthStore();
+  const { isInitialized, isAuthenticated, checkAuthStatus } = useAuthStore();
 
   // Form state management
   const [formData, setFormData] = useState({
@@ -21,11 +21,11 @@ export default function LoginPage() {
   }, [checkAuthStatus]);
 
   // Redirect authenticated users to dashboard
-  // useEffect(() => {
-  //   if (isAuthenticated && isInitialized) {
-  //     router.push('/dashboard');
-  //   }
-  // }, [isAuthenticated, isInitialized, router]);
+  useEffect(() => {
+    if (isAuthenticated && isInitialized) {
+      router.push('/dashboard');
+    }
+  }, [isAuthenticated, isInitialized, router]);
 
   // Form input handler
   const handleInputChange = (userData: React.ChangeEvent<HTMLInputElement>) => {
@@ -40,6 +40,7 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    //Service
     try {
       // Gateway를 통한 로그인 요청
       const apiUrl = 'https://gateway-production-1104.up.railway.app';
@@ -50,8 +51,8 @@ export default function LoginPage() {
       // 성공 메시지 표시
       if (response.data.success) {
         alert(`✅ ${response.data.message}\n\n이름: ${response.data.name}\n이메일: ${response.data.email}\n회사 ID: ${response.data.company_id}`);
-        // 로그인 성공 후 메인페이지로 이동
-        router.push('/');
+        // 로그인 성공 후 대시보드로 이동
+        router.push('/dashboard');
       } else {
         alert(`❌ ${response.data.message}`);
       }
@@ -83,8 +84,7 @@ export default function LoginPage() {
   }
 
   // Show login screen for unauthenticated users
-  // if (!isAuthenticated && isInitialized) {
-  if (true) { // 임시로 항상 로그인 화면 표시
+  if (!isAuthenticated && isInitialized) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center p-4">
         <div className="w-full max-w-sm">

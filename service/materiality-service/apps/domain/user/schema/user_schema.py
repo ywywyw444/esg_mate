@@ -15,6 +15,6 @@ class SignupRequest(BaseModel):
     industry: str = Field(..., description="산업 분야", min_length=1)
     email: str = Field(..., description="이메일 주소", pattern=r"^[^@]+@[^@]+\.[^@]+$")
     name: str = Field(..., description="사용자 이름", min_length=1)
-    age: str = Field(..., description="나이", min_length=1)
+    birth: str = Field(..., description="생년월일", min_length=1)
     auth_id: str = Field(..., description="인증 ID", min_length=1)
     auth_pw: str = Field(..., description="인증 비밀번호")

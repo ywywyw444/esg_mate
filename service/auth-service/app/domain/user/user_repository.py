@@ -35,7 +35,7 @@ class UserRepository:
                         industry=user_entity.industry,
                         email=user_entity.email,
                         name=user_entity.name,
-                        age=user_entity.age,
+                        birth=user_entity.birth,
                         auth_id=user_entity.auth_id,
                         auth_pw=user_entity.auth_pw
                     )
@@ -86,11 +86,12 @@ class UserRepository:
                 if user_entity:
                     # Entity를 BaseModel로 변환하여 반환
                     user_model = SignupRequest(
+                        id=user_entity.id,
                         company_id=user_entity.company_id,
                         industry=user_entity.industry,
                         email=user_entity.email,
                         name=user_entity.name,
-                        age=user_entity.age,
+                        birth=user_entity.birth,
                         auth_id=user_entity.auth_id,
                         auth_pw=user_entity.auth_pw
                     )
@@ -117,7 +118,7 @@ class UserRepository:
                     industry=user_data['industry'],
                     email=user_data['email'],
                     name=user_data['name'],
-                    age=user_data['age'],
+                    birth=user_data['birth'],
                     auth_id=user_data['auth_id'],
                     auth_pw=user_data['auth_pw']
                 )
@@ -131,11 +132,12 @@ class UserRepository:
                 
                 # 생성된 Entity를 BaseModel로 변환하여 반환
                 user_model = SignupRequest(
+                    id=new_user_entity.id,
                     company_id=new_user_entity.company_id,
                     industry=new_user_entity.industry,
                     email=new_user_entity.email,
                     name=new_user_entity.name,
-                    age=new_user_entity.age,
+                    birth=new_user_entity.birth,
                     auth_id=new_user_entity.auth_id,
                     auth_pw=new_user_entity.auth_pw
                 )

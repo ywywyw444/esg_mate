@@ -13,6 +13,6 @@ class UserEntity(Base):
     industry = Column(Text, nullable=False)
     email = Column(Text, nullable=False, unique=True)
     name = Column(Text, nullable=False)
-    age = Column(Text, nullable=False)
+    birth = Column(Text, nullable=False)
     auth_id = Column(Text, nullable=False, unique=True)
     auth_pw = Column(Text, nullable=False)
