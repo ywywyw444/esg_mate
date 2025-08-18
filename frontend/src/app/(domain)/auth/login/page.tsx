@@ -51,6 +51,7 @@ export default function LoginPage() {
       // 성공 메시지 표시
       if (response.data.success) {
         alert(`✅ ${response.data.message}\n\n이름: ${response.data.name}\n이메일: ${response.data.email}\n회사 ID: ${response.data.company_id}`);
+        
         // 로그인 성공 후 대시보드로 이동
         router.push('/dashboard');
       } else {
@@ -190,13 +191,13 @@ export default function LoginPage() {
                     </svg>
                   </button>
                 </div>
-                             </div>
-             </form>
-           </div>
-         </div>
-       </div>
-     );
-   }
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-   return null;
- }
+  return null;
+}

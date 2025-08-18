@@ -1,59 +1,114 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import PWAStatus from '@/components/PWAStatus';
 
 export default function DashboardPage() {
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState('dashboard');
+
+  const navigationTabs = [
+    { id: 'dashboard', name: 'Dashboard', path: '/dashboard', color: 'bg-orange-500' },
+    { id: 'materiality', name: 'Materiality', path: '/materiality/home', color: 'bg-blue-500' },
+    { id: 'gri', name: 'GRI', path: '/gri/intake', color: 'bg-blue-500' },
+    { id: 'esrs', name: 'ESRS', path: '/esrs/intake', color: 'bg-blue-500' },
+    { id: 'report', name: 'Report', path: '/gri/report', color: 'bg-blue-500' }
+  ];
+
+  const handleTabClick = (tab: typeof navigationTabs[0]) => {
+    setActiveTab(tab.id);
+    if (tab.id !== 'dashboard') {
+      router.push(tab.path);
+    }
+  };
+
   const handleButtonClick = (action: string) => {
     console.log(`${action} 버튼 클릭됨`);
     // 여기에 각 버튼별 동작 로직 추가
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+    <div className="min-h-screen bg-white">
       {/* PWA 상태 표시 */}
       <PWAStatus />
       
-      <div className="w-full max-w-md space-y-4">
-        {/* 기업명 버튼 */}
-        <button
-          onClick={() => handleButtonClick('기업명')}
-          className="w-full bg-teal-700 hover:bg-teal-800 text-white font-medium py-3 px-6 rounded-lg border border-black transition-colors duration-200 shadow-md"
-        >
-          기업명
-        </button>
+      {/* 상단 내비게이션 바 */}
+      <div className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4">
+          <nav className="flex space-x-1" aria-label="Tabs">
+            {navigationTabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => handleTabClick(tab)}
+                className={`px-6 py-4 text-sm font-medium rounded-t-lg transition-all duration-200 ${
+                  activeTab === tab.id
+                    ? `${tab.color} text-white shadow-lg`
+                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
+                }`}
+              >
+                {tab.name}
+              </button>
+            ))}
+          </nav>
+        </div>
+      </div>
 
-        {/* 재무정보(표) 버튼 */}
-        <button
-          onClick={() => handleButtonClick('재무정보')}
-          className="w-full bg-teal-700 hover:bg-teal-800 text-white font-medium py-4 px-6 rounded-lg border border-black transition-colors duration-200 shadow-md"
-        >
-          재무정보(표)
-        </button>
+      {/* 메인 콘텐츠 영역 - 주황색 테두리 */}
+      <div className="max-w-7xl mx-auto p-6">
+        <div className="border-4 border-orange-400 rounded-xl p-8 bg-orange-50">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Dashboard Page
+            </h1>
+            <p className="text-gray-600">
+              기업 지속가능성 관리 대시보드
+            </p>
+          </div>
 
-        {/* 중대성평가 결과 버튼 */}
-        <button
-          onClick={() => handleButtonClick('중대성평가')}
-          className="w-full bg-teal-700 hover:bg-teal-800 text-white font-medium py-4 px-6 rounded-lg border border-black transition-colors duration-200 shadow-md"
-        >
-          중대성평가 결과
-        </button>
+          {/* 수직 버튼들 */}
+          <div className="w-full max-w-md mx-auto space-y-4">
+            {/* 기업명 버튼 */}
+            <button
+              onClick={() => handleButtonClick('기업명')}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg border border-black transition-colors duration-200 shadow-md"
+            >
+              기업명
+            </button>
 
-        {/* GRI 보고서 작성 결과 버튼 */}
-        <button
-          onClick={() => handleButtonClick('GRI보고서')}
-          className="w-full bg-teal-700 hover:bg-teal-800 text-white font-medium py-4 px-6 rounded-lg border border-black transition-colors duration-200 shadow-md"
-        >
-          GRI 보고서 작성 결과
-        </button>
+            {/* 재무정보(표) 버튼 */}
+            <button
+              onClick={() => handleButtonClick('재무정보')}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-4 px-6 rounded-lg border border-black transition-colors duration-200 shadow-md"
+            >
+              재무정보(표)
+            </button>
 
-        {/* TCFD보고서 작성 결과 버튼 */}
-        <button
-          onClick={() => handleButtonClick('TCFD보고서')}
-          className="w-full bg-teal-700 hover:bg-teal-800 text-white font-medium py-4 px-6 rounded-lg border border-black transition-colors duration-200 shadow-md"
-        >
-          TCFD보고서 작성 결과
-        </button>
+            {/* 중대성평가 결과 버튼 */}
+            <button
+              onClick={() => handleButtonClick('중대성평가')}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-4 px-6 rounded-lg border border-black transition-colors duration-200 shadow-md"
+            >
+              중대성평가 결과
+            </button>
+
+            {/* GRI 보고서 작성 결과 버튼 */}
+            <button
+              onClick={() => handleButtonClick('GRI보고서')}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-4 px-6 rounded-lg border border-black transition-colors duration-200 shadow-md"
+            >
+              GRI 보고서 작성 결과
+            </button>
+
+            {/* TCFD보고서 작성 결과 버튼 */}
+            <button
+              onClick={() => handleButtonClick('TCFD보고서')}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-4 px-6 rounded-lg border border-black transition-colors duration-200 shadow-md"
+            >
+              TCFD보고서 작성 결과
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

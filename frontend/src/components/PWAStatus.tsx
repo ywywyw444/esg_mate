@@ -3,18 +3,22 @@
 import React from 'react';
 import { usePWA } from '@/hooks/usePWA';
 
+interface CacheInfo {
+  name: string;
+  size: number;
+}
+
 export default function PWAStatus() {
   const { 
     isOnline, 
     isInstalled, 
     isStandalone,
-    checkNetworkStatus,
     getCacheStatus,
     clearCache,
     checkForUpdates 
   } = usePWA();
 
-  const [cacheInfo, setCacheInfo] = React.useState<any[]>([]);
+  const [cacheInfo, setCacheInfo] = React.useState<CacheInfo[]>([]);
   const [isChecking, setIsChecking] = React.useState(false);
 
   const handleCheckCache = async () => {
