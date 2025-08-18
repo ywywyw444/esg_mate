@@ -42,15 +42,19 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
+        working-directory: ./frontend
         run: pnpm install
 
       - name: Lint check
+        working-directory: ./frontend
         run: pnpm lint
 
       - name: Type check
+        working-directory: ./frontend
         run: pnpm type-check
 
       - name: Build check
+        working-directory: ./frontend
         run: pnpm build
 
   # Vercel 배포 (프로덕션)
@@ -75,9 +79,11 @@ jobs:
           version: ${{ env.PNPM_VERSION }}
 
       - name: Install dependencies
+        working-directory: ./frontend
         run: pnpm install
 
       - name: Build application
+        working-directory: ./frontend
         run: pnpm build
 
       - name: Deploy to Vercel
@@ -110,9 +116,11 @@ jobs:
           version: ${{ env.PNPM_VERSION }}
 
       - name: Install dependencies
+        working-directory: ./frontend
         run: pnpm install
 
       - name: Build application
+        working-directory: ./frontend
         run: pnpm build
 
       - name: Deploy to Vercel (Preview)
@@ -164,9 +172,11 @@ jobs:
           version: ${{ env.PNPM_VERSION }}
 
       - name: Install dependencies
+        working-directory: ./frontend
         run: pnpm install
 
       - name: Run Lighthouse CI
+        working-directory: ./frontend
         run: |
           pnpm add -g @lhci/cli
           lhci autorun
