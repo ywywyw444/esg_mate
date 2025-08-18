@@ -1,3 +1,10 @@
+// Window 인터페이스 확장
+declare global {
+  interface Window {
+    workbox?: any;
+  }
+}
+
 // Service Worker 등록
 export function register() {
   if (
