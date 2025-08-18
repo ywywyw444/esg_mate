@@ -8,7 +8,7 @@ interface AuthState {
     email?: string;
   } | null;
   checkAuthStatus: () => Promise<void>;
-  login: (username: string, _password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -47,10 +47,12 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   },
 
-  login: async (username: string, _password: string) => {
+  login: async (username: string, password: string) => {
     try {
       // TODO: 실제 로그인 API 호출
-      // 임시 로그인 로직 (_password는 향후 API 호출에서 사용)
+      // password는 향후 API 호출에서 사용할 예정
+      console.log('로그인 시도:', { username, password: '***' });
+      
       const mockUserData = {
         username,
         email: `${username}@example.com`
