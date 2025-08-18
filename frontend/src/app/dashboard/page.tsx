@@ -2,6 +2,7 @@
 
 import React from 'react';
 import NavigationTabs from '@/components/NavigationTabs';
+import PWAStatus from '@/components/PWAStatus';
 
 export default function DashboardPage() {
   const handleButtonClick = (action: string) => {
@@ -11,6 +12,9 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* PWA 상태 표시 */}
+      <PWAStatus />
+      
       {/* 상단 내비게이션 바 */}
       <NavigationTabs />
 

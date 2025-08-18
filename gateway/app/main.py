@@ -63,11 +63,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 # 모든 요청 로깅 미들웨어 추가
 @app.middleware("http")
 async def log_all_requests(request: Request, call_next):
-    logger.info(f"�� 모든 요청 로깅: {request.method} {request.url.path}")
+    logger.info(f"🌐 모든 요청 로깅: {request.method} {request.url.path}")
     logger.info(f"🌐 요청 헤더: {dict(request.headers)}")
     
     # 응답 처리
@@ -88,7 +87,7 @@ gateway_router = APIRouter(tags=["Gateway API"], prefix="/api/v1")
 # 라우터 등록 확인 로그
 logger.info("🔧 Gateway 라우터 생성 완료")
 logger.info(f"🔧 라우터 prefix: {gateway_router.prefix}")
-logger.info(f"�� 라우터 tags: {gateway_router.tags}")
+logger.info(f"🔧 라우터 tags: {gateway_router.tags}")
 
 # ������ 파일이 필요한 서비스 목록 (현재는 없음)
 FILE_REQUIRED_SERVICES = set()
