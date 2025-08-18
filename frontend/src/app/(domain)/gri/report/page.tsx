@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 
 export default function GriReportPage() {
   const [activeTab, setActiveTab] = useState('general');
-  const [reportData, setReportData] = useState({
+  const [reportData] = useState({
     companyName: 'ABC 기업',
     reportYear: '2024',
     industry: '제조업',

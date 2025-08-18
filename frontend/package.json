@@ -1,9 +1,9 @@
 {
-  "name": "ai-chat-assistant",
-  "version": "0.1.0",
+  "name": "est-mate",
+  "version": "1.0.0",
   "private": true,
-  "description": "AI 채팅 어시스턴트 - Next.js, TypeScript, React, Zustand, Axios를 사용한 PWA",
-  "author": "Your Name",
+  "description": "Est Mate - GRI, TCFD 등 지속가능성 보고서 작성을 위한 종합 PWA 플랫폼",
+  "author": "Est Mate Team",
   "license": "MIT",
   "scripts": {
     "dev": "next dev",
@@ -12,12 +12,14 @@
     "lint": "next lint",
     "type-check": "tsc --noEmit",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "pwa:build": "next build && next export",
+    "pwa:analyze": "next build --debug",
+    "pwa:test": "next build && serve out"
   },
   "dependencies": {
     "axios": "^1.11.0",
     "next": "15.4.5",
-    "next-pwa": "^5.6.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "zustand": "^5.0.7"
@@ -32,10 +34,32 @@
     "eslint-config-next": "15.4.5",
     "prettier": "^3.0.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "serve": "^14.2.1"
   },
   "engines": {
-  "node": "20.x",
-  "npm": "10.x"
-}
+    "node": "20.x",
+    "npm": "10.x"
+  },
+  "pwa": {
+    "name": "Est Mate",
+    "short_name": "Est Mate",
+    "description": "지속가능성 보고서 작성 도구",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#0d9488",
+    "icons": [
+      {
+        "src": "/icon-192x192.png",
+        "sizes": "192x192",
+        "type": "image/png"
+      },
+      {
+        "src": "/icon-512x512.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }
+    ]
+  }
 }

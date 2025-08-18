@@ -1,15 +1,42 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Vercel에서는 output: 'standalone'이 필요하지 않음
-  env: {
-    PORT: process.env.PORT || '3000',
-  },
-
-  // Vercel 최적화 설정
+  /* config options here */
   experimental: {
-    optimizePackageImports: ['@vercel/analytics']
-  }
+    optimizePackageImports: ['@radix-ui/react-icons'],
+  },
+  // PWA를 위한 설정
+  headers: async () => {
+    return [
+      {
+        source: '/sw.js',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=0, must-revalidate',
+          },
+        ],
+      },
+      {
+        source: '/manifest.json',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=0, must-revalidate',
+          },
+        ],
+      },
+    ];
+  },
+  // PWA 아이콘 및 매니페스트 파일을 public 폴더에 복사
+  async rewrites() {
+    return [
+      {
+        source: '/manifest.json',
+        destination: '/api/manifest',
+      },
+    ];
+  },
 };
 
 export default nextConfig;

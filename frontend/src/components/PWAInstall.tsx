@@ -69,7 +69,7 @@ export default function PWAInstall() {
           text: 'GRI, TCFD 등 지속가능성 보고서 작성을 위한 종합 플랫폼',
           url: window.location.href,
         });
-      } catch (error) {
+      } catch {
         console.log('공유가 취소되었습니다');
       }
     } else {
@@ -121,7 +121,7 @@ export default function PWAInstall() {
             
             <button
               onClick={handleShareClick}
-              className="flex-1 bg-gray-100 text-gray-700 text-xs font-medium py-2 px-3 rounded-md hover:bg-gray-200 transition-all duration-200"
+              className="flex-1 bg-gray-100 text-gray-700 text-xs font-medium py-2 px-3 rounded-md hover:bg-gray-200 transition-colors duration-200"
             >
               공유하기
             </button>

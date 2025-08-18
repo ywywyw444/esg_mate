@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import PWAStatus from '@/components/PWAStatus';
 
 export default function DashboardPage() {
   const handleButtonClick = (action: string) => {
@@ -8,10 +9,11 @@ export default function DashboardPage() {
     // 여기에 각 버튼별 동작 로직 추가
   };
 
-
-  
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4">
+      {/* PWA 상태 표시 */}
+      <PWAStatus />
+      
       <div className="w-full max-w-md space-y-4">
         {/* 기업명 버튼 */}
         <button
@@ -20,6 +22,7 @@ export default function DashboardPage() {
         >
           기업명
         </button>
+
         {/* 재무정보(표) 버튼 */}
         <button
           onClick={() => handleButtonClick('재무정보')}

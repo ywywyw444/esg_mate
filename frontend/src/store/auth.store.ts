@@ -47,10 +47,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   },
 
-  login: async (username: string, _password: string) => {
+  login: async (username: string, password: string) => {
     try {
       // TODO: 실제 로그인 API 호출
-      // 임시 로그인 로직
+      // 임시 로그인 로직 (password는 향후 API 호출에서 사용)
       const mockUserData = {
         username,
         email: `${username}@example.com`
