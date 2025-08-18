@@ -1,7 +1,13 @@
+// workbox 타입 정의
+interface Workbox {
+  messageSkipWaiting?: () => void;
+  messageSW?: (message: any) => void;
+}
+
 // Window 인터페이스 확장
 declare global {
   interface Window {
-    workbox?: any;
+    workbox?: unknown;
   }
 }
 
