@@ -1,65 +1,63 @@
 {
-  "name": "est-mate",
-  "version": "1.0.0",
+  "name": "est-mate-frontend",
+  "version": "0.1.0",
   "private": true,
-  "description": "Est Mate - GRI, TCFD 등 지속가능성 보고서 작성을 위한 종합 PWA 플랫폼",
-  "author": "Est Mate Team",
-  "license": "MIT",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "lint:fix": "next lint --fix",
     "type-check": "tsc --noEmit",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:e2e": "playwright test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "prepare": "husky install",
+    "pre-commit": "lint-staged",
+    "analyze": "ANALYZE=true next build",
     "pwa:build": "next build && next export",
-    "pwa:analyze": "next build --debug",
-    "pwa:test": "next build && serve out"
+    "vercel-build": "next build"
   },
   "dependencies": {
-    "axios": "^1.11.0",
-    "next": "15.4.5",
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
-    "zustand": "^5.0.7"
+    "next": "14.0.4",
+    "react": "^18",
+    "react-dom": "^18",
+    "zustand": "^4.4.7",
+    "axios": "^1.6.2",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "typescript": "^5",
+    "tailwindcss": "^3.3.0",
+    "autoprefixer": "^10.0.1",
+    "postcss": "^8",
+    "eslint": "^8",
+    "eslint-config-next": "14.0.4"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3",
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "15.4.5",
-    "prettier": "^3.0.0",
-    "tailwindcss": "^4",
-    "typescript": "^5",
-    "serve": "^14.2.1"
+    "@types/jest": "^29.5.8",
+    "@typescript-eslint/eslint-plugin": "^6.13.1",
+    "@typescript-eslint/parser": "^6.13.1",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "husky": "^8.0.3",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "lint-staged": "^15.1.0",
+    "playwright": "^1.40.0",
+    "prettier": "^3.1.0",
+    "ts-jest": "^29.1.1"
   },
-  "engines": {
-    "node": "20.x",
-    "npm": "10.x"
-  },
-  "pwa": {
-    "name": "Est Mate",
-    "short_name": "Est Mate",
-    "description": "지속가능성 보고서 작성 도구",
-    "start_url": "/",
-    "display": "standalone",
-    "background_color": "#ffffff",
-    "theme_color": "#0d9488",
-    "icons": [
-      {
-        "src": "/icon-192x192.png",
-        "sizes": "192x192",
-        "type": "image/png"
-      },
-      {
-        "src": "/icon-512x512.png",
-        "sizes": "512x512",
-        "type": "image/png"
-      }
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
     ]
   }
 }

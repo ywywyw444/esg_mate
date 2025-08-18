@@ -1,194 +1,188 @@
-# Est Mate - 지속가능성 보고서 작성 PWA
+# Est Mate Frontend
 
-GRI, TCFD 등 지속가능성 보고서 작성을 위한 종합 Progressive Web App (PWA) 플랫폼입니다.
+Next.js 기반의 지속가능성 보고서 작성 PWA 플랫폼
 
-## 🚀 주요 기능
+## 🚀 기술 스택
 
-- **GRI 보고서 작성**: GRI 표준에 따른 지속가능성 보고서 작성 도구
-- **TCFD 보고서 작성**: 기후 관련 재무정보 공시 보고서 작성 도구
-- **중대성 평가**: ESG 요소별 중대성 평가 및 관리
-- **PWA 지원**: 모바일 앱과 같은 사용자 경험
-- **오프라인 지원**: 네트워크 연결 없이도 기본 기능 사용 가능
-
-## 🛠️ 기술 스택
-
-- **Frontend**: Next.js 15, React 19, TypeScript
-- **Styling**: Tailwind CSS
+- **Framework**: Next.js 14
+- **Language**: TypeScript
 - **State Management**: Zustand
-- **PWA**: Service Worker, Web App Manifest
-- **Deployment**: Vercel
+- **HTTP Client**: Axios
+- **Styling**: Tailwind CSS
+- **PWA**: Next.js PWA
+- **Package Manager**: pnpm
 
-## 📱 PWA 기능
+## 🏗️ 프로젝트 구조
 
-### 설치 및 사용
-- 홈 화면에 앱 추가 가능
-- 독립 실행 모드 지원
-- 네이티브 앱과 유사한 사용자 경험
+```
+src/
+├── app/                 # Next.js App Router
+├── components/          # 재사용 가능한 컴포넌트
+├── domain/             # 도메인별 페이지
+├── services/           # API 서비스
+├── store/              # Zustand 스토어
+└── types/              # TypeScript 타입 정의
+```
 
-### 오프라인 지원
-- Service Worker를 통한 캐싱
-- 오프라인 상태에서도 기본 기능 사용
-- 자동 동기화 및 업데이트
-
-### 성능 최적화
-- 자동 캐싱 및 업데이트
-- 백그라운드 동기화
-- 푸시 알림 지원
-
-## 🚀 시작하기
+## 🛠️ 개발 환경 설정
 
 ### 필수 요구사항
-- Node.js 20.x
-- npm 10.x
 
-### 설치
+- Node.js 18.x 이상
+- pnpm 8.x 이상
+
+### 설치 및 실행
+
 ```bash
 # 의존성 설치
-npm install
+pnpm install
 
 # 개발 서버 실행
-npm run dev
+pnpm dev
 
 # 프로덕션 빌드
-npm run build
+pnpm build
 
 # 프로덕션 서버 실행
-npm start
+pnpm start
 ```
 
-### PWA 관련 명령어
+## 🧪 테스트
+
 ```bash
-# PWA 빌드
-npm run pwa:build
+# 단위 테스트 실행
+pnpm test
 
-# PWA 분석
-npm run pwa:analyze
+# 테스트 커버리지 확인
+pnpm test:coverage
 
-# PWA 테스트
-npm run pwa:test
+# E2E 테스트 실행
+pnpm test:e2e
+
+# 테스트 감시 모드
+pnpm test:watch
 ```
 
-## 📁 프로젝트 구조
+## 📝 코드 품질
 
-```
-frontend/
-├── src/
-│   ├── app/                    # Next.js App Router
-│   │   ├── (domain)/          # 도메인별 페이지
-│   │   │   ├── auth/          # 인증 관련
-│   │   │   ├── gri/           # GRI 보고서
-│   │   │   └── tcfd/          # TCFD 보고서
-│   │   ├── dashboard/         # 대시보드
-│   │   └── layout.tsx         # 루트 레이아웃
-│   ├── components/             # 재사용 가능한 컴포넌트
-│   │   ├── PWAInstall.tsx     # PWA 설치 컴포넌트
-│   │   └── PWAStatus.tsx      # PWA 상태 표시
-│   ├── hooks/                  # 커스텀 훅
-│   │   └── usePWA.ts          # PWA 관련 훅
-│   └── store/                  # 상태 관리
-├── public/                     # 정적 파일
-│   ├── manifest.json           # PWA 매니페스트
-│   ├── sw.js                   # Service Worker
-│   ├── offline.html            # 오프라인 페이지
-│   └── icons/                  # PWA 아이콘
-└── package.json
+```bash
+# 린팅
+pnpm lint
+
+# 린팅 자동 수정
+pnpm lint:fix
+
+# 타입 체크
+pnpm type-check
+
+# 코드 포맷팅
+pnpm format
+
+# 포맷팅 검사
+pnpm format:check
 ```
 
-## 🔧 PWA 설정
+## 🔄 CI/CD 파이프라인
 
-### 매니페스트 파일
-- `public/manifest.json`: PWA 기본 설정
-- 앱 이름, 아이콘, 테마 색상 등 정의
+### GitHub Actions 워크플로우
 
-### Service Worker
-- `public/sw.js`: 오프라인 지원 및 캐싱
-- 자동 업데이트 및 백그라운드 동기화
+1. **Quality Check**: 코드 품질, 린팅, 타입 체크, 빌드, 테스트
+2. **Security Scan**: 보안 취약점 스캔
+3. **Deploy Preview**: develop 브랜치 → Vercel Preview
+4. **Deploy Production**: main 브랜치 → Vercel Production
+5. **Performance Test**: Lighthouse CI를 통한 성능 테스트
+6. **Notification**: 배포 상태 알림
 
-### 메타 태그
-- `src/app/layout.tsx`: PWA 관련 메타 태그
-- iOS 및 Android 최적화
+### 브랜치 전략
 
-## 📱 모바일 최적화
+- **main**: 프로덕션 배포
+- **develop**: 프리뷰 배포 및 테스트
 
-### 반응형 디자인
-- 모든 화면 크기 지원
-- 터치 친화적 인터페이스
-- 모바일 우선 설계
+### 자동화된 작업
 
-### 성능 최적화
-- 이미지 최적화
-- 코드 스플리팅
-- 지연 로딩
+- 코드 품질 검사
+- 자동 테스트 실행
+- 보안 스캔
+- 성능 테스트
+- 자동 배포
+- 알림 발송
+
+## 🔐 환경변수
+
+프로젝트 루트에 `.env.local` 파일을 생성하고 다음 변수들을 설정하세요:
+
+```bash
+# API Configuration
+NEXT_PUBLIC_API_URL=https://api.example.com
+NEXT_PUBLIC_APP_URL=https://app.example.com
+
+# Authentication
+NEXT_PUBLIC_AUTH_DOMAIN=auth.example.com
+NEXT_PUBLIC_AUTH_CLIENT_ID=your_client_id
+
+# External Services
+MATERIALITY_SERVICE_URL=https://materiality-service.example.com
+SURVEY_SERVICE_URL=https://survey-service.example.com
+AUTH_SERVICE_URL=https://auth-service.example.com
+
+# CORS
+CORS_ORIGINS=https://app.example.com,https://localhost:3000
+```
 
 ## 🚀 배포
 
 ### Vercel 배포
-```bash
-# Vercel CLI 설치
-npm i -g vercel
 
-# 배포
+1. Vercel 프로젝트 연결
+2. 환경변수 설정
+3. GitHub Actions를 통한 자동 배포
+
+### 수동 배포
+
+```bash
+# 프로덕션 빌드
+pnpm build
+
+# Vercel 배포
 vercel --prod
 ```
 
-### 환경 변수
-```bash
-# .env.local
-NEXT_PUBLIC_API_URL=your_api_url
-NEXT_PUBLIC_PWA_ENABLED=true
-```
+## 📱 PWA 기능
 
-## 📊 성능 모니터링
+- 오프라인 지원
+- 홈 화면 설치
+- 푸시 알림
+- 백그라운드 동기화
 
-### Core Web Vitals
-- LCP (Largest Contentful Paint)
-- FID (First Input Delay)
-- CLS (Cumulative Layout Shift)
+## 🔧 개발 도구
 
-### PWA 메트릭
-- 설치율
-- 오프라인 사용률
-- 캐시 히트율
+- **ESLint**: 코드 품질 검사
+- **Prettier**: 코드 포맷팅
+- **Husky**: Git 훅
+- **lint-staged**: 커밋 전 자동 검사
+- **Jest**: 단위 테스트
+- **Playwright**: E2E 테스트
+- **Lighthouse CI**: 성능 테스트
 
-## 🔍 개발 도구
+## 📊 모니터링
 
-### PWA 디버깅
-- Chrome DevTools > Application > Service Workers
-- Lighthouse PWA 감사
-- Chrome DevTools > Application > Manifest
+- Vercel Analytics
+- Lighthouse CI 성능 지표
+- GitHub Actions 실행 상태
+- 보안 취약점 스캔 결과
 
-### 테스트
-```bash
-# PWA 테스트
-npm run pwa:test
+## 🤝 기여 가이드
 
-# 성능 분석
-npm run pwa:analyze
-```
-
-## 📚 참고 자료
-
-- [PWA 가이드](https://web.dev/progressive-web-apps/)
-- [Service Worker API](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API)
-- [Web App Manifest](https://developer.mozilla.org/en-US/docs/Web/Manifest)
-- [Next.js PWA](https://nextjs.org/docs/app/building-your-application/optimizing/progressive-web-apps)
-
-## 🤝 기여하기
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+1. Fork 및 Clone
+2. Feature 브랜치 생성
+3. 코드 작성 및 테스트
+4. Pull Request 생성
+5. 코드 리뷰 후 머지
 
 ## 📄 라이선스
 
-이 프로젝트는 MIT 라이선스 하에 배포됩니다. 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
+MIT License
 
-## 📞 문의
+## 🆘 지원
 
-프로젝트에 대한 문의사항이 있으시면 이슈를 생성해 주세요.
-
----
-
-**Est Mate** - 지속가능한 미래를 위한 보고서 작성 도구 🚀
+문제가 발생하거나 질문이 있으시면 GitHub Issues를 통해 문의해주세요.
