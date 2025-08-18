@@ -1,10 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
 
 export default function MaterialityHomePage() {
-  const router = useRouter();
   const [selectedCompany, setSelectedCompany] = useState('ABC 기업');
   const [selectedYear, setSelectedYear] = useState('2024');
 
