@@ -1,28 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import PWAStatus from '@/components/PWAStatus';
+import React from 'react';
+import NavigationTabs from '@/components/NavigationTabs';
 
 export default function DashboardPage() {
-  const router = useRouter();
-  const [activeTab, setActiveTab] = useState('dashboard');
-
-  const navigationTabs = [
-    { id: 'dashboard', name: 'Dashboard', path: '/dashboard', color: 'bg-orange-500' },
-    { id: 'materiality', name: 'Materiality', path: '/materiality/home', color: 'bg-blue-500' },
-    { id: 'gri', name: 'GRI', path: '/gri/intake', color: 'bg-blue-500' },
-    { id: 'esrs', name: 'ESRS', path: '/esrs/intake', color: 'bg-blue-500' },
-    { id: 'report', name: 'Report', path: '/gri/report', color: 'bg-blue-500' }
-  ];
-
-  const handleTabClick = (tab: typeof navigationTabs[0]) => {
-    setActiveTab(tab.id);
-    if (tab.id !== 'dashboard') {
-      router.push(tab.path);
-    }
-  };
-
   const handleButtonClick = (action: string) => {
     console.log(`${action} 버튼 클릭됨`);
     // 여기에 각 버튼별 동작 로직 추가
@@ -30,29 +11,8 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* PWA 상태 표시 */}
-      <PWAStatus />
-      
       {/* 상단 내비게이션 바 */}
-      <div className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4">
-          <nav className="flex space-x-1" aria-label="Tabs">
-            {navigationTabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => handleTabClick(tab)}
-                className={`px-6 py-4 text-sm font-medium rounded-t-lg transition-all duration-200 ${
-                  activeTab === tab.id
-                    ? `${tab.color} text-white shadow-lg`
-                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
-                }`}
-              >
-                {tab.name}
-              </button>
-            ))}
-          </nav>
-        </div>
-      </div>
+      <NavigationTabs />
 
       {/* 메인 콘텐츠 영역 - 주황색 테두리 */}
       <div className="max-w-7xl mx-auto p-6">
